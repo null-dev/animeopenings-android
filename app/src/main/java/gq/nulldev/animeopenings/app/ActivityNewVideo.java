@@ -26,14 +26,12 @@ import org.json.JSONException;
 import subtitleFile.TimedTextObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ActivityNewVideo extends Activity {
     public final static String TAG = "AnimeOpenings";
+    public final static Locale LOCALE = Locale.US;
 
     //UI Elements
     private ProgressBar bufferIndicator;
@@ -463,13 +461,13 @@ public class ActivityNewVideo extends Activity {
             switch(preferences.getString("prefVideoType", "all")) {
                 case "openings":
                     //Loop till we get an opening
-                    while (!vid.getName().toUpperCase().contains("OPENING")) {
+                    while (!vid.getName().toUpperCase(LOCALE).contains("OPENING")) {
                         vid = Video.getRandomVideo(videos);
                     }
                     break;
                 case "endings":
                     //Loop till we get an ending
-                    while (!vid.getName().toUpperCase().contains("ENDING")) {
+                    while (!vid.getName().toUpperCase(LOCALE).contains("ENDING")) {
                         vid = Video.getRandomVideo(videos);
                     }
                     break;
@@ -537,7 +535,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     String formatMs(int ms) {
-        return String.format("%02d:%02d",
+        return String.format(LOCALE, "%02d:%02d",
                 TimeUnit.MILLISECONDS.toMinutes(ms),
                 TimeUnit.MILLISECONDS.toSeconds(ms) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(ms))

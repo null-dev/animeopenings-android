@@ -12,10 +12,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ToggleButton;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -127,7 +124,7 @@ public class ActivityPB extends Activity {
                     boolean useRegex = ((ToggleButton) findViewById(R.id.btnUseRegex)).isChecked();
                     if (!useRegex) {
                         String[] split = trim
-                                .toLowerCase()
+                                .toLowerCase(ActivityNewVideo.LOCALE)
                                 .replace("-", " ")
                                 .replace("_", " ")
                                 .replace("*", " ")
@@ -137,7 +134,7 @@ public class ActivityPB extends Activity {
                         displayingVideos.addAll(sortedVideos);
                         for (Video.ListSeriesItem listSeriesItem : sortedVideos) {
                             for (String splitItem : split) {
-                                if (!listSeriesItem.getName().toLowerCase().contains(splitItem)) {
+                                if (!listSeriesItem.getName().toLowerCase(ActivityNewVideo.LOCALE).contains(splitItem)) {
                                     displayingVideos.remove(listSeriesItem);
                                 }
                             }

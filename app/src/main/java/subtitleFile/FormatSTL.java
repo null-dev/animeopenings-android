@@ -1,5 +1,7 @@
 package subtitleFile;
 
+import gq.nulldev.animeopenings.app.ActivityNewVideo;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -218,7 +220,7 @@ public class FormatSTL implements TimedTextFileFormat {
 
 		}
 		//other info
-		DateFormat dateFormat = new SimpleDateFormat("yyMMdd");
+		DateFormat dateFormat = new SimpleDateFormat("yyMMdd", ActivityNewVideo.LOCALE);
 		Date date = new Date();
 		String aux = dateFormat.format(date);
 		aux +=  aux + "00"; //revision number
