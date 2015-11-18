@@ -27,5 +27,6 @@ If you are actually going to use this, I recommend downloading the release versi
 
 # Download
 The release version can be downloaded at: http://nulldev.xyz/apps/
+The development versions can be downloaded at: http://cirelease.nulldev.xyz/build/ (Just get the one that ends in the biggest number)
 
 I may setup a CI for building development version soon.
