@@ -1,0 +1,62 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="#000000"
+    android:windowActionBar="false"
+    android:windowTitleSize="0dp"
+    tools:context=".MainActivity">
+
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+    <tv.danmaku.ijk.media.sample.widget.media.IjkVideoView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fullscreen_video"
+    android:keepScreenOn="true"
+        android:layout_gravity="center" />
+
+    <TextView android:id="@+id/controls_info" android:layout_width="match_parent"
+        android:layout_height="match_parent" android:keepScreenOn="true" android:textColor="#33b5e5"
+        android:textSize="40sp" android:gravity="center"
+        android:text="@string/dummy_content"
+        android:shadowColor="#000000"
+        android:shadowDx="0.0"
+        android:shadowDy="0.0"
+        android:shadowRadius="2.0"/>
+
+    <TextView android:id="@+id/song_info" android:layout_width="match_parent"
+        android:layout_height="match_parent" android:keepScreenOn="true"
+        android:alpha="0.0"
+        android:textSize="40sp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:shadowColor="#000000"
+        android:shadowDx="0.0"
+        android:shadowDy="0.0"
+        android:shadowRadius="2.0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/subTextView"
+        android:layout_gravity="center_horizontal|bottom"
+        android:textColor="#ffbeffc8" />
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+    <!--<FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:fitsSystemWindows="true">-->
+
+        <!--<LinearLayout android:id="@+id/fullscreen_content_controls" style="?metaButtonBarStyle"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal" android:background="@color/black_overlay"
+            android:orientation="horizontal" tools:ignore="UselessParent">-->
+                        <!--<Button android:id="@+id/dummy_button" style="?metaButtonBarButtonStyle" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/dummy_button" />-->
+
+        <!--</LinearLayout>-->
+
+    <!--</FrameLayout>-->
+
+</FrameLayout>
