@@ -14,3 +14,5 @@ android:
 
     - extra
     - add-on
+
+after_failure: "cat /home/travis/build/null-dev/animeopenings-android/app/build/outputs/lint-results.html"
