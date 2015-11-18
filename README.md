@@ -13,6 +13,17 @@ Original 'openings.moe' by AniDev: https://github.com/AniDevTwitter/animeopening
 <sub>* not in release version</sub><br>
 <sub>+ broken in dev version</sub>
 
+# Status
+Dev version (version in repo) is currently almost a complete rewrite of the old app and is very buggy.
+If you are actually going to use this, I recommend downloading the release version instead.
+
+# TODO List
+- Fix all bugs in new dev version
+- Background playing with notification controls
+- Better subtitle support
+- Video caching
+- Setup CI
+
 # Download
 The release version can be downloaded at: http://nulldev.xyz/apps/
 

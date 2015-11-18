@@ -82,12 +82,10 @@ public class ActivityPB extends Activity {
         findViewById(R.id.btnSelNone).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < videoListViewAdapter.getGroupCount(); i++) {
-                    Video.ListSeriesItem seriesItem = videoListViewAdapter.getGroup(i);
-                    for (Video.ListVideoItem videoItem : seriesItem.getChildren()) {
+                for(Video.ListSeriesItem video : sortedVideos) {
+                    for(Video.ListVideoItem videoItem : video.getChildren()) {
                         videoItem.setIsSelected(false);
                     }
-                    expandableListView.collapseGroup(i);
                 }
                 updateUI();
             }
@@ -96,9 +94,8 @@ public class ActivityPB extends Activity {
         findViewById(R.id.btnSelAll).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 0; i < videoListViewAdapter.getGroupCount(); i++) {
-                    Video.ListSeriesItem seriesItem = videoListViewAdapter.getGroup(i);
-                    for (Video.ListVideoItem videoItem : seriesItem.getChildren()) {
+                for(Video.ListSeriesItem video : sortedVideos) {
+                    for(Video.ListVideoItem videoItem : video.getChildren()) {
                         videoItem.setIsSelected(true);
                     }
                 }
