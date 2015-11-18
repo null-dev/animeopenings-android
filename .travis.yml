@@ -15,4 +15,10 @@ android:
     - extra
     - add-on
 
+install:
+  - true
+
+script:
+  - ./gradlew :app:assembleDebug
+
 after_failure: "cat /home/travis/build/null-dev/animeopenings-android/app/build/outputs/lint-results.html"
