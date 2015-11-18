@@ -44,13 +44,10 @@ dependencies {
     compile 'com.android.support:gridlayout-v7:19.0.0'
     compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.github.paolorotolo:appintro:3.2.0'
+    //compile 'com.github.paolorotolo:appintro:3.2.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.2@aar') {
         transitive = true;
     }
-
-    //VLC
-    compile 'at.aau.itec.android.mediaplayer:mediaplayer:1.4.3'
 
     /*compile('com.mopub:mopub-sdk:4.0.0@aar') {
         transitive = true
