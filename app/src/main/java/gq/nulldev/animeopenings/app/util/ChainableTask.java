@@ -11,6 +11,8 @@ import java.util.HashMap;
 
 /**
  * A chainable task for use in ChainableTaskList
+ *
+ * Not used currently
  */
 public abstract class ChainableTask implements Runnable {
     boolean executed;

@@ -1,7 +1,9 @@
 package gq.nulldev.animeopenings.app.util;
 
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.widget.TextView;
+import gq.nulldev.animeopenings.app.ActivityNewVideo;
 import subtitleFile.Caption;
 import subtitleFile.TimedTextObject;
 
@@ -136,7 +138,13 @@ public class SubtitleSeeker {
         public void run() {
             if (captionList != null) {
                 //Get the current position
-                int currentPosition = view.getCurrentPosition();
+                int currentPosition;
+                try {
+                    currentPosition = view.getCurrentPosition();
+                } catch(IllegalStateException e) {
+                    Log.i(ActivityNewVideo.TAG, "Mediaplayer in illegal state!", e);
+                    return;
+                }
                 //Check if the user is seeking around
                 if(currentPosition < prevTime) {
                     //Re-add all the removed subtitles

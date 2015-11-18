@@ -11,6 +11,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Fully chainable task lists with persistent data storage, task dependencies and auto dependency-resolving sorting!
+ *
+ * Not used currently
  */
 public class ChainableTaskList {
     boolean executed = false;
