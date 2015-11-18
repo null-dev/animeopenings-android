@@ -54,9 +54,9 @@ public class VideoListViewAdapter extends BaseExpandableListAdapter {
 
         if (resultView == null) {
 
-            resultView = inflater.inflate(android.R.layout.simple_list_item_1, null); //TODO change layout id
+            resultView = inflater.inflate(android.R.layout.simple_list_item_1, null);
             holder = new ViewHolder();
-            holder.textLabel = (TextView) resultView.findViewById(android.R.id.text1); //TODO change view id
+            holder.textLabel = (TextView) resultView.findViewById(android.R.id.text1);
             resultView.setTag(holder);
         } else {
             holder = (ViewHolder) resultView.getTag();
@@ -96,9 +96,9 @@ public class VideoListViewAdapter extends BaseExpandableListAdapter {
         ViewHolder holder;
 
         if (resultView == null) {
-            resultView = inflater.inflate(android.R.layout.simple_expandable_list_item_1, null); //TODO change layout id
+            resultView = inflater.inflate(android.R.layout.simple_expandable_list_item_1, null);
             holder = new ViewHolder();
-            holder.textLabel = (TextView) resultView.findViewById(android.R.id.text1); //TODO change view id
+            holder.textLabel = (TextView) resultView.findViewById(android.R.id.text1);
             resultView.setTag(holder);
         } else {
             holder = (ViewHolder) resultView.getTag();
