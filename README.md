@@ -9,6 +9,7 @@ Original 'openings.moe' by AniDev: https://github.com/AniDevTwitter/animeopening
 - Easter eggs*
 - Background and screen-off play<sup>+</sup>
 - All other features included in web version
+- Gesture controls
 
 <sub>* not in release version</sub><br>
 <sub>+ broken in dev version</sub>
