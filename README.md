@@ -25,9 +25,11 @@ If you are actually going to use this, I recommend downloading the release versi
 - Background playing with notification controls
 - Better subtitle support
 - Video caching
-- Setup CI
 
 # Download
 The release version can be downloaded at: http://nulldev.xyz/apps/
 
 The development versions can be downloaded at: http://cirelease.nulldev.xyz/build/ (Just get the one that ends in the biggest number)
+
+# Dependencies
+AnimeOpenings uses OkHttp (https://github.com/square/okhttp) to fetch subtitles and a modified version of SubtitleSeeker (https://github.com/null-dev/SubtitleSeeker) to sync the subtitles to the MediaPlayer.
