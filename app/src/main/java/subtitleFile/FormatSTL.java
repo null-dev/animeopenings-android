@@ -138,15 +138,13 @@ public class FormatSTL implements TimedTextFileFormat {
 					tto.warnings += "Unexpected subtitle number at TTI block "+i+". Parsing proceeds...\n\n";
 				//EBN : Extension Block Number 3
 				int ebn = ttiBlock[3];
-				if (ebn != -1)
-					additionalText = true;
-				else additionalText = false;
+                additionalText = ebn != -1;
 
 				//CS : Cumulative Status 4
 				//TCI : Time Code In 5..8
 				String startTime = ""+ttiBlock[5]+":"+ttiBlock[6]+":"+ttiBlock[7]+":"+ttiBlock[8];
 				//TCO : Time Code Out 9..12
-				String endTime = ""+ttiBlock[9]+":"+ttiBlock[10]+":"+ttiBlock[11]+":"+ttiBlock[12];;
+				String endTime = ""+ttiBlock[9]+":"+ttiBlock[10]+":"+ttiBlock[11]+":"+ttiBlock[12];
 				//VP : Vertical Position 13
 				//JC : Justification Code 14
 				int justification = ttiBlock[14];
@@ -283,7 +281,7 @@ public class FormatSTL implements TimedTextFileFormat {
 			//we clean XML, span would be implemented here
 			int pos = 16;
 			for (int i = 0; i < lines.length; i++) 
-				lines[i] = lines[i].replaceAll("\\<.*?\\>", "");
+				lines[i] = lines[i].replaceAll("<.*?>", "");
 			//we code the style
 			if (currentC.style != null){
 				Style style = currentC.style;
@@ -318,14 +316,14 @@ public class FormatSTL implements TimedTextFileFormat {
 			for (int i = 0; i < lines.length; i++) {
 				
 				char [] chars = lines[i].toCharArray();
-				for (int j = 0; j < chars.length; j++) {
-					//check the text is not too long
-					if (pos >126)
-						break;
-					//check it is a supported char, else it is ignored
-					if (chars[j]>=0x20 && chars[j]<=0x7f)
-						ttiBlock[pos++]= (byte) chars[j];
-				}
+                for (char aChar : chars) {
+                    //check the text is not too long
+                    if (pos > 126)
+                        break;
+                    //check it is a supported char, else it is ignored
+                    if (aChar >= 0x20 && aChar <= 0x7f)
+                        ttiBlock[pos++] = (byte) aChar;
+                }
 				
 				if (i+1 < lines.length)
 					ttiBlock[pos++]= (byte) 0x8A;
@@ -350,9 +348,6 @@ public class FormatSTL implements TimedTextFileFormat {
 	
 	/**
 	 * This method parses the text field taking into account STL control codes
-	 * @param currentCaption
-	 * @param textField
-	 * @param justification 
 	 */
 	private void parseTextForSTL(Caption currentCaption, byte[] textField, int justification, TimedTextObject tto) {
 		
@@ -437,9 +432,6 @@ public class FormatSTL implements TimedTextFileFormat {
 					default:
 						//non valid code...
 					}
-				} else {
-					//other codes and non supported characters...
-					//corresponds to the upper half of the character code table
 				}
 
 			} else if(textField[i] < 32){
