@@ -46,6 +46,13 @@
             android:label="@string/activity_pb_label">
         </activity>
 
+        <!-- Notification Activity -->
+        <activity android:name="gq.nulldev.animeopenings.app.NotificationListenerActivity"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true">
+        </activity>
+
         <!-- New Video Player -->
 
         <!--<activity

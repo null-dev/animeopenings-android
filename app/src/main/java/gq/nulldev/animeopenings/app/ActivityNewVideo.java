@@ -45,6 +45,9 @@ public class ActivityNewVideo extends Activity {
     private TextView subtitleTextView;
     private LinearLayout topButtonBar;
 
+    //Music service
+    MusicService musicService;
+
     //Controls
     public boolean controlsShowing = true;
 
@@ -126,8 +129,7 @@ public class ActivityNewVideo extends Activity {
         topButtonBar = (LinearLayout) findViewById(R.id.topBtnBar);
 
         //Default seek bar to 00:00/00:00
-        updatePlaybackRangeText(0,
-                0);
+        updatePlaybackRangeText(0, 0);
 
         //Assign actions to buttons
         //Open settings on settings button click
@@ -294,19 +296,6 @@ public class ActivityNewVideo extends Activity {
                 trackInfo.setText(Html.fromHtml(trackString));
                 mediaPlayer.start();
                 showControls();
-
-                /*trackInfo.setAlpha(1.0f);
-                trackInfo.clearAnimation();
-                trackInfo.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
-                        anim.setDuration(1000);
-                        anim.setFillEnabled(true);
-                        anim.setFillAfter(true);
-                        trackInfo.startAnimation(anim);
-                    }
-                }, 2000);*/
             }
         });
         return mediaPlayer;
@@ -583,14 +572,14 @@ final class GestureListener extends GestureDetector.SimpleOnGestureListener {
                     result = true;
                 }
             }
-            else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                if (diffY > 0) {
+//            else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+//                if (diffY > 0) {
 //                    MainActivity.INSTANCE.onSwipeBottom();
-                } else {
+//                } else {
 //                    MainActivity.INSTANCE.onSwipeTop();
-                }
-            }
-//            result = true;
+//                }
+//            }
+            result = true;
 
         } catch (Exception exception) {
             exception.printStackTrace();
