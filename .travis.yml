@@ -23,4 +23,4 @@ script:
 
 after_failure: "cat /home/travis/build/null-dev/animeopenings-android/app/build/outputs/lint-results.html"
 after_success:
-    "curl --ftp-create-dirs -T app/build/outputs/apk/app-debug.apk -u $FTP_USER:$FTP_PASSWORD ftp://185.28.20.24/build/animeopenings-build_$TRAVIS_BUILD_NUMBER.apk"
+    "curl --ftp-create-dirs -T app/build/outputs/apk/app-debug.apk -u $FTP_USER:$FTP_PASSWORD ftp://185.28.20.24/build/ao-br$TRAVIS_BRANCH-co$TRAVIS_COMMIT-bu$TRAVIS_BUILD_NUMBER.apk"
