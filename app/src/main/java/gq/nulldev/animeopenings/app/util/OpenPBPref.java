@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import gq.nulldev.animeopenings.app.ActivityPB;
 
 /**
- * Project: MiMangaNu
+ * Project: AnimeOpenings
  * Created: 13/11/15
  * Author: nulldev
  */

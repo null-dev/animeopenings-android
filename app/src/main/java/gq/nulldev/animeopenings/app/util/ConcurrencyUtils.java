@@ -9,7 +9,12 @@ import android.os.Looper;
  * Author: nulldev
  */
 public class ConcurrencyUtils {
+
+    static Handler handler;
+
     public static void runOnUiThread(Runnable r) {
-        new Handler(Looper.getMainLooper()).post(r);
+        if(handler == null)
+            handler = new Handler(Looper.getMainLooper());
+        handler.post(r);
     }
 }

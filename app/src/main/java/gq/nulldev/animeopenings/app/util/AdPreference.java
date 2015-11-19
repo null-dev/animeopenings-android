@@ -20,6 +20,8 @@ import com.amazon.device.ads.*;
 import com.startapp.android.publish.banner.Banner;
 import com.startapp.android.publish.banner.BannerListener;
 
+//This isn't used anymore but it will stay here for now if anyone wants to put ads into their copy
+
 public class AdPreference extends Preference implements AdListener, /*MoPubView.BannerAdListener,*/ BannerListener {
 
     public AdPreference(Context context, AttributeSet attrs, int defStyle) {super    (context, attrs, defStyle);}
