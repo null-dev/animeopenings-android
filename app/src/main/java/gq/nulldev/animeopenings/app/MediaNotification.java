@@ -46,13 +46,20 @@ public class MediaNotification {
         }
 
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        //Register onclick to open main text
+        Intent launchMainApp = new Intent(context, ActivityNewVideo.class);
+        PendingIntent launchMainAppPE = PendingIntent.getActivity(context, 10, launchMainApp, 0);
+        builder.setContentIntent(launchMainAppPE);
+
         notificationManager.notify(2, builder.build());
+
     }
 
     public void setListeners(RemoteViews view){
         linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PREV", 0, R.id.btnPrev);
-        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE", 0, R.id.btnPlayPause);
-        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_NEXT", 0, R.id.btnNext);
+        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE", 1, R.id.btnPlayPause);
+        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_NEXT", 2, R.id.btnNext);
     }
 
     void linkIntentToButton(RemoteViews view, String action, int requestCode, int button) {
