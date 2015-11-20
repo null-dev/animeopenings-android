@@ -21,7 +21,7 @@ public class MediaNotification {
     NotificationManager notificationManager;
     private RemoteViews remoteView;
 
-    public MediaNotification(Context context) {
+    public MediaNotification(Context context, String title, String details, boolean playing) {
         this.context = context;
         //Get notification manager
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
@@ -34,6 +34,14 @@ public class MediaNotification {
         //set the button listeners
         setListeners(remoteView);
         builder.setContent(remoteView);
+
+        remoteView.setTextViewText(R.id.title, title);
+        remoteView.setTextViewText(R.id.details, details);
+        if(playing) {
+            remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_pause);
+        } else {
+            remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_play);
+        }
 
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(2, builder.build());

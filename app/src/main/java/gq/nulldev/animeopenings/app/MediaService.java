@@ -1,6 +1,7 @@
 package gq.nulldev.animeopenings.app;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import com.danikula.videocache.HttpProxyCacheServer;
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public class MediaService extends Service {
     public static final String ACTION_PLAYPAUSE = "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE";
     public static final String ACTION_NEXT = "gq.nulldev.animeopenings.app.ACTION_NEXT";
 
+    public static HttpProxyCacheServer proxyCacheServer;
+
     MediaPlayer player;
     ArrayList<Video> videos;
     Stack<Video> playedVideos = new Stack<>();
@@ -34,12 +38,19 @@ public class MediaService extends Service {
     SharedPreferences preferences;
     OnMediaPlayerBuiltListener onMediaPlayerBuiltListener;
     int playlistIndex = 0;
-    boolean paused;
+    boolean paused = false;
 
     public void setupService(ArrayList<Video> videos, SubtitleSeeker subtitleSeeker, SharedPreferences preferences) {
         this.videos = videos;
         this.subtitleSeeker = subtitleSeeker;
         this.preferences = preferences;
+    }
+
+    public static HttpProxyCacheServer getProxy(Context context) {
+        if(proxyCacheServer == null) {
+            proxyCacheServer = new HttpProxyCacheServer(context);
+        }
+        return proxyCacheServer;
     }
 
     @Override
@@ -105,7 +116,7 @@ public class MediaService extends Service {
         try {
             if(player == null)
                 buildNewMediaPlayer();
-            player.setDataSource(this, Uri.parse(vid.getFileURL()));
+            player.setDataSource(this, Uri.parse(getProxy(this).getProxyUrl(vid.getFileURL())));
             player.prepareAsync();
         } catch(Exception ignored) {}
     }

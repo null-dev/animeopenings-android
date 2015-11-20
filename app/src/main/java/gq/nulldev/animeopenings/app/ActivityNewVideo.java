@@ -43,6 +43,7 @@ public class ActivityNewVideo extends Activity {
 
     //Music service
     MediaService mediaService;
+    ServiceConnection serviceConnection;
 
     //Controls
     public boolean controlsShowing = true;
@@ -62,18 +63,16 @@ public class ActivityNewVideo extends Activity {
     //Subtitles seeker
     SubtitleSeeker subtitleSeeker;
 
+    //MediaNotification
+    MediaNotification notification;
+
     //Backgrounded?
     boolean inBackground = false;
 
     public final static int PLAY_ICON = android.R.drawable.ic_media_play;
     public final static int PAUSE_ICON = android.R.drawable.ic_media_pause;
 
-    boolean paused = false;
-    boolean initialized = false;
-
     HideControlsTask hideControlsTask;
-
-    int position = -1;
 
     public SharedPreferences preferences;
 
@@ -162,23 +161,10 @@ public class ActivityNewVideo extends Activity {
         //Setup mediaplayer
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-//                if (!initialized) {
-//                    buildVideos();
-//                    initialized = true;
-//                } else {
-//                    if (position == -1) {
-//                        playNextVideo();
-//                    } else {
-//                        mediaService.playVideo(currentVideo);
-//                    }
-//                }
-            }
+            public void surfaceCreated(SurfaceHolder holder) {}
 
             @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            }
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
@@ -196,12 +182,21 @@ public class ActivityNewVideo extends Activity {
                 updatePlayPauseButton();
             }
         });
-        new MediaNotification(this);
+    }
+
+    void updateNotification() {
+        if(notification != null) {
+            notification.cancel();
+        }
+        notification = new MediaNotification(this,
+                mediaService.getCurrentVideo().getName(),
+                mediaService.getCurrentVideo().getSource(),
+                mediaService.isPaused());
     }
 
     void bindServices() {
         Intent intent = new Intent(this, MediaService.class);
-        bindService(intent, new ServiceConnection() {
+        serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mediaService = ((MediaService.MediaBinder) service).getService();
@@ -283,7 +278,8 @@ public class ActivityNewVideo extends Activity {
             public void onServiceDisconnected(ComponentName name) {
                 Log.w("AnimeOpenings", "MediaService disconnected!");
             }
-        }, Context.BIND_AUTO_CREATE);
+        };
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -293,11 +289,12 @@ public class ActivityNewVideo extends Activity {
     }
 
     void updatePlayPauseButton() {
-        if (paused) {
+        if (mediaService.isPaused()) {
             playPauseButton.setImageDrawable(getResources().getDrawable(PLAY_ICON));
         } else {
             playPauseButton.setImageDrawable(getResources().getDrawable(PAUSE_ICON));
         }
+        updateNotification();
     }
 
     void updateSeekMax(int max) {
@@ -441,6 +438,9 @@ public class ActivityNewVideo extends Activity {
         super.onDestroy();
 
         INSTANCE = null;
+        if(serviceConnection != null) {
+            unbindService(serviceConnection);
+        }
     }
 }
 
