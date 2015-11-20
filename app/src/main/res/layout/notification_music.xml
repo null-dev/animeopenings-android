@@ -30,6 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SongInfo"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent.Title"
             />
 
         <TextView
@@ -37,6 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SongDetails"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent"
             />
     </LinearLayout>
 
