@@ -126,6 +126,7 @@ public class MediaService extends Service {
             player.setDataSource(this, Uri.parse(getProxy(this).getProxyUrl(vid.getFileURL())));
             player.prepareAsync();
         } catch(Exception ignored) {}
+        updateNotification();
     }
 
     public void playNextVideo() {

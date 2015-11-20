@@ -19,27 +19,30 @@ import android.widget.RemoteViews;
 public class MediaNotification {
     Context context;
     NotificationManager notificationManager;
-    private RemoteViews remoteView;
+    NotificationCompat.Builder builder = null;
+    RemoteViews remoteView;
 
-    public MediaNotification(Context context, String title, String details, boolean playing) {
+    public MediaNotification(Context context, String title, String details, boolean paused) {
         this.context = context;
         //Get notification manager
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setContentTitle("Music Controller")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setOngoing(true);
-
-        remoteView = new RemoteViews(context.getPackageName(), R.layout.notification_music);
-
-        //set the button listeners
-        setListeners(remoteView);
-        builder.setContent(remoteView);
+        if(remoteView == null) {
+            remoteView = new RemoteViews(context.getPackageName(), R.layout.notification_music);
+            setListeners(remoteView);
+        }
+        if(builder == null) {
+            builder = new NotificationCompat.Builder(context)
+                    .setContentTitle("Music Controller")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setOngoing(true);
+            //set the button listeners
+            builder.setContent(remoteView);
+        }
 
         remoteView.setTextViewText(R.id.title, title);
         remoteView.setTextColor(R.id.title, android.R.style.TextAppearance_StatusBar_EventContent_Title);
         remoteView.setTextViewText(R.id.details, details);
         remoteView.setTextColor(R.id.details, android.R.style.TextAppearance_StatusBar_EventContent);
-        if(playing) {
+        if(!paused) {
             remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_pause);
         } else {
             remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_play);
