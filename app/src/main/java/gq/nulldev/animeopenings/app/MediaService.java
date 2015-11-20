@@ -28,7 +28,8 @@ public class MediaService extends Service {
     public static final String ACTION_PLAYPAUSE = "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE";
     public static final String ACTION_NEXT = "gq.nulldev.animeopenings.app.ACTION_NEXT";
 
-    public static HttpProxyCacheServer proxyCacheServer;
+    static HttpProxyCacheServer proxyCacheServer;
+    static long previousProxyCacheSize = -1;
 
     MediaPlayer player;
     ArrayList<Video> videos;
@@ -49,11 +50,26 @@ public class MediaService extends Service {
         this.preferences = preferences;
     }
 
-    public static HttpProxyCacheServer getProxy(Context context) {
-        if(proxyCacheServer == null) {
-            proxyCacheServer = new HttpProxyCacheServer(context);
+    public static HttpProxyCacheServer getProxy(Context context, long size) {
+        if(proxyCacheServer == null
+                || previousProxyCacheSize == -1
+                || size != previousProxyCacheSize) {
+            proxyCacheServer = new HttpProxyCacheServer.Builder(context)
+                    .maxCacheSize(size)
+                    .build();
+            previousProxyCacheSize = size;
         }
         return proxyCacheServer;
+    }
+
+    public static String proxyURL(Context context, SharedPreferences preferences, String url) {
+        if(preferences.getBoolean("prefCacheVideos", true)) {
+            HttpProxyCacheServer proxy = getProxy(context,
+                    preferences.getInt("prefCacheLimit", 512)*1000000);
+            return proxy.getProxyUrl(url);
+        } else {
+            return url;
+        }
     }
 
     @Override
@@ -123,7 +139,7 @@ public class MediaService extends Service {
         try {
             if(player == null)
                 buildNewMediaPlayer();
-            player.setDataSource(this, Uri.parse(getProxy(this).getProxyUrl(vid.getFileURL())));
+            player.setDataSource(this, Uri.parse(proxyURL(this, preferences, vid.getFileURL())));
             player.prepareAsync();
         } catch(Exception ignored) {}
         updateNotification();
@@ -272,6 +288,14 @@ public class MediaService extends Service {
     public class MediaBinder extends Binder {
         MediaService getService() {
             return MediaService.this;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(notification != null) {
+            notification.cancel();
         }
     }
 }

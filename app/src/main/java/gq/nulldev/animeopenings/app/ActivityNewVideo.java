@@ -158,7 +158,14 @@ public class ActivityNewVideo extends Activity {
         //Setup mediaplayer
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
-            public void surfaceCreated(SurfaceHolder holder) {}
+            public void surfaceCreated(SurfaceHolder holder) {
+                if(mediaService != null && mediaService.getPlayer()  != null) {
+                    Log.i(TAG, "Surface re-created, restoring MediaPlayer state!");
+                    int position = mediaService.getPlayer().getCurrentPosition();
+                    mediaService.playVideo(mediaService.getCurrentVideo());
+                    mediaService.getPlayer().seekTo(position);
+                }
+            }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}

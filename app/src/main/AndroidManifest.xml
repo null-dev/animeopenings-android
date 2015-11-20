@@ -20,6 +20,7 @@
             android:name="gq.nulldev.animeopenings.app.ActivityNewVideo"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,13 +46,6 @@
         <activity
             android:name="gq.nulldev.animeopenings.app.ActivityPB"
             android:label="@string/activity_pb_label">
-        </activity>
-
-        <!-- Notification Activity -->
-        <activity android:name="gq.nulldev.animeopenings.app.NotificationListenerActivity"
-            android:launchMode="singleTask"
-            android:taskAffinity=""
-            android:excludeFromRecents="true">
         </activity>
 
         <!-- MediaPlayer Service -->

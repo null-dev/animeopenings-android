@@ -147,7 +147,11 @@ public class SubtitleSeeker {
                 if(currentPosition < prevTime) {
                     //Re-add all the removed subtitles
                     captionList.clear();
-                    captionList.addAll(textObject.captions.values());
+                    if(textObject.captions != null) {
+                        captionList.addAll(textObject.captions.values());
+                    } else {
+                        return;
+                    }
                 }
                 //We may have multiple captions so a StringBuilder is more faster and suitable
                 StringBuilder captionBuilder = new StringBuilder();

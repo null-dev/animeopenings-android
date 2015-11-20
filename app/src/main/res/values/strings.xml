@@ -2,7 +2,9 @@
     <string name="app_name">Anime Openings</string>
     <string name="app_settings_name">Anime Openings Settings</string>
 
-    <string name="pref_general_category">Anime Openings Settings</string>
+    <string name="pref_general_category">General</string>
+    <string name="pref_cache_category">Cache</string>
+    <string name="pref_advanced_category">Advanced</string>
     <string name="pref_loop_video">Loop Video</string>
     <string name="pref_loop_video_sum">Loop the video at the end instead of proceeding to the next one.</string>
 
@@ -20,6 +22,9 @@
 
     <string name="pref_eastereggs">Enable Easter Eggs</string>
     <string name="pref_eastereggs_sum">:P</string>
+
+    <string name="pref_cache_videos">Enable Video Caching</string>
+    <string name="pref_cache_videos_sum">Keep some played videos on your device to reduce data usage.</string>
     
     <string name="pref_openpe">Advanced Preferences</string>
     <string name="pref_openpe_sum">For advanced users only! Opens SharedPreferences editor.</string>
@@ -53,4 +58,6 @@
     <string name="not_next">Next Video</string>
     <string name="not_playpause">Play/Pause</string>
     <string name="not_prev">Previous Video</string>
+    <string name="pref_cache_limit">Maximum Cache Size (MB)</string>
+    <string name="pref_cache_limit_sum">The maximum amount of space which the cache will use in megabytes.</string>
 </resources>

@@ -38,6 +38,23 @@
         <gq.nulldev.animeopenings.app.util.OpenPBPref
             android:title="@string/pref_pb"
             android:summary="@string/pref_pb_sum"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_cache_category">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="prefCacheVideos"
+            android:summary="@string/pref_cache_videos_sum"
+            android:title="@string/pref_cache_videos" >
+        </CheckBoxPreference>
+        <EditTextPreference
+            android:defaultValue="512"
+            android:key="prefCacheLimit"
+            android:summary="@string/pref_cache_limit_sum"
+            android:title="@string/pref_cache_limit"
+            android:numeric="integer"
+            />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_advanced_category">
         <gq.nulldev.animeopenings.app.util.OpenPEPref
             android:title="@string/pref_openpe"
             android:summary="@string/pref_openpe_sum"/>
