@@ -2,15 +2,10 @@ package gq.nulldev.animeopenings.app;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -26,7 +21,8 @@ import org.json.JSONException;
 import subtitleFile.TimedTextObject;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ActivityNewVideo extends Activity {
@@ -46,7 +42,7 @@ public class ActivityNewVideo extends Activity {
     private LinearLayout topButtonBar;
 
     //Music service
-    MusicService musicService;
+    MediaService mediaService;
 
     //Controls
     public boolean controlsShowing = true;
@@ -59,22 +55,12 @@ public class ActivityNewVideo extends Activity {
 
     //Played videos
     public ArrayList<Video> videos;
-    public Stack<Video> playedVideos = new Stack<>();
-
-    //Currently playing video
-    public Video currentVideo;
 
     //Gesture detector
     GestureDetector gestureDetector;
 
-    //Playlist index
-    int playlistIndex = 0;
-
     //Subtitles seeker
     SubtitleSeeker subtitleSeeker;
-
-    //Media player
-    MediaPlayer mediaPlayer = null;
 
     //Backgrounded?
     boolean inBackground = false;
@@ -141,7 +127,7 @@ public class ActivityNewVideo extends Activity {
         });
 
         //Make subtitle seeker
-        subtitleSeeker = new SubtitleSeeker(mediaPlayer, subtitleTextView);
+        subtitleSeeker = new SubtitleSeeker(null, subtitleTextView);
 
         //Gesture listener
         surfaceView.setOnTouchListener(new View.OnTouchListener() {
@@ -159,8 +145,8 @@ public class ActivityNewVideo extends Activity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mediaPlayer != null) {
-                    mediaPlayer.seekTo(progress);
+                if (fromUser && mediaService.getPlayer() != null) {
+                    mediaService.getPlayer().seekTo(progress);
                 }
             }
 
@@ -177,29 +163,16 @@ public class ActivityNewVideo extends Activity {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                if (!initialized) {
-                    buildVideos();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-                                //Update seek bar
-                                updateSeekPlayed(mediaPlayer.getCurrentPosition());
-                                //Update played
-                                updatePlaybackRangeText(mediaPlayer.getCurrentPosition(),
-                                        mediaPlayer.getDuration());
-                            }
-                            handler.postDelayed(this, 500);
-                        }
-                    });
-                    initialized = true;
-                } else {
-                    if (position == -1) {
-                        playNextVideo();
-                    } else {
-                        playVideo(currentVideo);
-                    }
-                }
+//                if (!initialized) {
+//                    buildVideos();
+//                    initialized = true;
+//                } else {
+//                    if (position == -1) {
+//                        playNextVideo();
+//                    } else {
+//                        mediaService.playVideo(currentVideo);
+//                    }
+//                }
             }
 
             @Override
@@ -209,102 +182,113 @@ public class ActivityNewVideo extends Activity {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                if (mediaPlayer != null) {
-                    //TODO Background play
-                    position = mediaPlayer.getCurrentPosition();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
+                if (mediaService.getPlayer() != null) {
+                    mediaService.getPlayer().setDisplay(null);
                 }
             }
         });
 
         //Play pause video
         playPauseButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                if (mediaPlayer != null) {
-                    if (paused) {
-                        mediaPlayer.start();
-                        paused = false;
-                    } else {
-                        mediaPlayer.pause();
-                        paused = true;
-                    }
-                    updatePlayPauseButton();
-                }
+                mediaService.doPlayPause();
+                updatePlayPauseButton();
             }
         });
+        new MediaNotification(this);
     }
 
-    MediaPlayer buildNewMediaPlayer() {
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setDisplay(surfaceView.getHolder());
-        subtitleSeeker.setView(mediaPlayer);
-        //Show buffer progress in seekbar
-        mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+    void bindServices() {
+        Intent intent = new Intent(this, MediaService.class);
+        bindService(intent, new ServiceConnection() {
             @Override
-            public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                updateSeekBuffered(percent);
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mediaService = ((MediaService.MediaBinder) service).getService();
+                mediaService.setOnMediaPlayerBuiltListener(new MediaService.OnMediaPlayerBuiltListener() {
+                    @Override
+                    public void onMediaPlayerBuilt(MediaPlayer mp) {
+                        mp.setDisplay(surfaceView.getHolder());
+                        //Show buffer progress in seekbar
+                        mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                            @Override
+                            public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                                updateSeekBuffered(percent);
+                            }
+                        });
+                        //Show spinny thing when buffering
+                        mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                            @Override
+                            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                                if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                                    bufferIndicator.setVisibility(View.VISIBLE);
+                                    return true;
+                                } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                                    bufferIndicator.setVisibility(View.GONE);
+                                    return true;
+                                }
+                                return false;
+                            }
+                        });
+                        //OnCompletionListener
+                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                if (preferences.getBoolean("prefLoopVideo", false)) {
+                                    mp.seekTo(0);
+                                    mp.start();
+                                } else {
+                                    playNextVideo();
+                                }
+                            }
+                        });
+                        //OnPreparedListener
+                        mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(final MediaPlayer mp) {
+                                //Update seek bar
+                                updateSeekMax(mp.getDuration());
+                                //Hide buffer loading indicator
+                                bufferIndicator.setVisibility(View.GONE);
+                                final TextView trackInfo = songInfo;
+                                String trackString = "<b>" + mediaService.getCurrentVideo().getSource() + "</b><br/>" + mediaService.getCurrentVideo().getName();
+                                if (mediaService.getCurrentVideo().getSubtitleSource() != null) {
+                                    trackString += "<br/>Subtitler: " + mediaService.getCurrentVideo().getSubtitleSource();
+                                }
+                                trackInfo.setText(Html.fromHtml(trackString));
+                                mp.start();
+                                showControls();
+                            }
+                        });
+                    }
+                });
+                mediaService.setupService(videos, subtitleSeeker, PreferenceManager.getDefaultSharedPreferences(ActivityNewVideo.this));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mediaService.getPlayer() != null && mediaService.getPlayer().isPlaying()) {
+//                            Update seek bar
+                            updateSeekPlayed(mediaService.getPlayer().getCurrentPosition());
+//                            Update played
+                            updatePlaybackRangeText(mediaService.getPlayer().getCurrentPosition(),
+                                    mediaService.getPlayer().getDuration());
+                        }
+                        handler.postDelayed(this, 500);
+                    }
+                });
+                playNextVideo();
             }
-        });
-        //Show spinny thing when buffering
-        mediaPlayer.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+
             @Override
-            public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                    bufferIndicator.setVisibility(View.VISIBLE);
-                    return true;
-                } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-                    bufferIndicator.setVisibility(View.GONE);
-                    return true;
-                }
-                return false;
+            public void onServiceDisconnected(ComponentName name) {
+                Log.w("AnimeOpenings", "MediaService disconnected!");
             }
-        });
-        //OnCompletionListener
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                if (preferences.getBoolean("prefLoopVideo", false)) {
-                    mediaPlayer.seekTo(0);
-                    mediaPlayer.start();
-                } else {
-                    playNextVideo();
-                }
-            }
-        });
-        //OnPreparedListener
-        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(final MediaPlayer mp) {
-                Log.i(TAG, "Prepared: " + mp.getDuration());
-                if (position != -1) {
-                    mp.seekTo(position);
-                    mp.start();
-                    position = -1;
-                }
-                //Update seek bar
-                updateSeekMax(mp.getDuration());
-                //Hide buffer loading indicator
-                bufferIndicator.setVisibility(View.GONE);
-                final TextView trackInfo = songInfo;
-                String trackString = "<b>" + currentVideo.getSource() + "</b><br/>" + currentVideo.getName();
-                if (currentVideo.getSubtitleSource() != null) {
-                    trackString += "<br/>Subtitler: " + currentVideo.getSubtitleSource();
-                }
-                trackInfo.setText(Html.fromHtml(trackString));
-                mediaPlayer.start();
-                showControls();
-            }
-        });
-        return mediaPlayer;
+        }, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
         buildVideos();
     }
 
@@ -329,7 +313,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     void updateSeekPlayed(int percent) {
-        if(mediaPlayer != null) {
+        if(mediaService.getPlayer() != null) {
             seekBar.setProgress(percent);
         }
     }
@@ -390,115 +374,36 @@ public class ActivityNewVideo extends Activity {
         controlsShowing = false;
     }
 
-    public void playPrevVideo() {
-        if(playedVideos.size() > 0) {
-            playedVideos.pop(); //Pop the current video
-            playVideo(playedVideos.peek());
-        } else {
+    void playPrevVideo() {
+        if(!mediaService.doPrev()) {
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Toast.makeText(ActivityNewVideo.this, "No previous videos to play!", Toast.LENGTH_SHORT).show();
                 }
             });
+        } else {
+            afterPlayVideo();
         }
     }
 
     public void playNextVideo() {
-        Video vid = null;
-        boolean handledByPlaylist = false;
-        if(preferences.getBoolean("enable_playlist", false)) {
-            boolean found = false;
-            while(!found) {
-                //Disable empty playlist
-                //noinspection Convert2Diamond (Doesn't work without it)
-                if (preferences.getStringSet("playlist", new HashSet<String>()).size() < 1) {
-                    preferences.edit().putBoolean("enable_playlist", false).apply();
-                    break;
-                } else {
-                    //noinspection Convert2Diamond (Doesn't work without it)
-                    Set<String> playlistSet = preferences.getStringSet("playlist", new HashSet<String>());
-                    String[] playlist = playlistSet.toArray(new String[playlistSet.size()]);
-                    if (playlistIndex >= playlist.length) {
-                        playlistIndex = 0;
-                    }
-                    String target = playlist[playlistIndex];
-                    playlistIndex++;
-                    for (Video video : videos) {
-                        if (video.getFile().equals(target)) {
-                            vid = video;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        playlistSet.remove(target);
-                        preferences
-                                .edit()
-                                .remove("playlist")
-                                .putStringSet("playlist", playlistSet)
-                                .apply();
-                    }
-                }
-            }
-            if(found) {
-                handledByPlaylist = true;
-            }
-        }
-        if(!handledByPlaylist) {
-            vid = Video.getRandomVideo(videos);
-            switch(preferences.getString("prefVideoType", "all")) {
-                case "openings":
-                    //Loop till we get an opening
-                    while (!vid.getName().toUpperCase(LOCALE).contains("OPENING")) {
-                        vid = Video.getRandomVideo(videos);
-                    }
-                    break;
-                case "endings":
-                    //Loop till we get an ending
-                    while (!vid.getName().toUpperCase(LOCALE).contains("ENDING")) {
-                        vid = Video.getRandomVideo(videos);
-                    }
-                    break;
-                default:
-                    //Do nothing really
-                    break;
-            }
-        }
-        playedVideos.push(vid);
-        playVideo(vid);
+        mediaService.playNextVideo();
+        afterPlayVideo();
     }
 
-    public void playVideo(final Video vid) {
-        subtitleSeeker.deSync(); //Desync the subtitle seeker
-        currentVideo = vid;
-        //Clear subtitles
-        subtitleTextView.setText("");
-        if(mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
+    void afterPlayVideo() {
+        bufferIndicator.setVisibility(View.VISIBLE);
+        //Enable subtitles if possible
+        if(preferences.getBoolean("prefSubtitles", true) && mediaService.getCurrentVideo().getSubtitleSource() != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    goSubtitles(mediaService.getCurrentVideo());
+                }
+            }, "AnimeOpenings > Subtitle DP").start();
         }
-        Log.i(TAG, "Playing video: " + vid.getFileURL());
-
-        paused = false;
         updatePlayPauseButton();
-
-        try {
-            bufferIndicator.setVisibility(View.VISIBLE);
-            //Enable subtitles if possible
-            if(preferences.getBoolean("prefSubtitles", true) && vid.getSubtitleSource() != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        goSubtitles(vid);
-                    }
-                }, "AnimeOpenings > Subtitle DP").start();
-            }
-            if(mediaPlayer == null)
-                buildNewMediaPlayer();
-            mediaPlayer.setDataSource(ActivityNewVideo.this, Uri.parse(vid.getFileURL()));
-            mediaPlayer.prepareAsync();
-        } catch(Exception ignored) {}
     }
 
     public void goSubtitles(Video vid) {
@@ -671,12 +576,13 @@ class GetVideosTask extends AsyncTask<Void, Void, ArrayList<Video>> {
 //            Log.d(LOG_TAG, Arrays.toString(videos.toArray()));
             dialog.dismiss();
             activityNewVideo.videos = videos;
-            ConcurrencyUtils.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    activityNewVideo.playNextVideo();
-                }
-            });
+//            ConcurrencyUtils.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    activityNewVideo.playNextVideo();
+//                }
+//            });
+            activityNewVideo.bindServices();
         }
     }
 

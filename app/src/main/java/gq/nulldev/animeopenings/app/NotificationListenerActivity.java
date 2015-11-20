@@ -16,9 +16,7 @@ public class NotificationListenerActivity extends Activity {
         String action = (String) getIntent().getExtras().get("DO");
         if (action.equals("volume")) {
             Log.i("AnimeOpenings", "NOTE: volume");
-            //Your code
         } else if (action.equals("stopNotification")) {
-            //Your code
             Log.i("AnimeOpenings", "NOTE: stopNotification");
         }
         finish();

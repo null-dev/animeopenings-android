@@ -16,12 +16,12 @@ import android.widget.RemoteViews;
 /**
  * Music controls!
  */
-public class MusicNotification {
+public class MediaNotification {
     Context context;
     NotificationManager notificationManager;
     private RemoteViews remoteView;
 
-    public MusicNotification(Context context) {
+    public MediaNotification(Context context) {
         this.context = context;
         //Get notification manager
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
@@ -40,17 +40,16 @@ public class MusicNotification {
     }
 
     public void setListeners(RemoteViews view){
-        //listener 1
-        Intent volume = new Intent(context,NotificationListenerActivity.class);
-        volume.putExtra("DO", "volume");
-        PendingIntent btn1 = PendingIntent.getActivity(context, 0, volume, 0);
-        view.setOnClickPendingIntent(R.id.btn1, btn1);
+        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PREV", 0, R.id.btnPrev);
+        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE", 0, R.id.btnPlayPause);
+        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_NEXT", 0, R.id.btnNext);
+    }
 
-        //listener 2
-        Intent stop = new Intent(context, NotificationListenerActivity.class);
-        stop.putExtra("DO", "stop");
-        PendingIntent btn2 = PendingIntent.getActivity(context, 1, stop, 0);
-        view.setOnClickPendingIntent(R.id.btn2, btn2);
+    void linkIntentToButton(RemoteViews view, String action, int requestCode, int button) {
+        Intent intent = new Intent(action);
+        PendingIntent pendingBtnIntent
+                = PendingIntent.getService(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        view.setOnClickPendingIntent(button, pendingBtnIntent);
     }
 
     public void cancel() {
