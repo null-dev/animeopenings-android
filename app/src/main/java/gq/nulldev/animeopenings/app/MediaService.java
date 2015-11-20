@@ -195,9 +195,9 @@ public class MediaService extends Service {
     }
 
     public void updateNotification() {
-        if(notification != null) {
-            notification.cancel();
-        }
+//        if(notification != null) {
+//            notification.cancel();
+//        }
         notification = new MediaNotification(this,
                 getCurrentVideo().getName(),
                 getCurrentVideo().getSource(),
