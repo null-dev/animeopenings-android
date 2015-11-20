@@ -40,6 +40,9 @@ public class MediaService extends Service {
     int playlistIndex = 0;
     boolean paused = false;
 
+    //MediaNotification
+    MediaNotification notification;
+
     public void setupService(ArrayList<Video> videos, SubtitleSeeker subtitleSeeker, SharedPreferences preferences) {
         this.videos = videos;
         this.subtitleSeeker = subtitleSeeker;
@@ -75,7 +78,9 @@ public class MediaService extends Service {
     }
 
     boolean doPrev() {
-        return playPrevVideo();
+        boolean result = playPrevVideo();
+        updateNotification();
+        return result;
     }
     void doPlayPause() {
         if (player != null) {
@@ -87,9 +92,11 @@ public class MediaService extends Service {
                 paused = true;
             }
         }
+        updateNotification();
     }
     void doNext() {
         playNextVideo();
+        updateNotification();
     }
 
     public boolean playPrevVideo() {
@@ -186,6 +193,16 @@ public class MediaService extends Service {
         playVideo(vid);
     }
 
+    public void updateNotification() {
+        if(notification != null) {
+            notification.cancel();
+        }
+        notification = new MediaNotification(this,
+                getCurrentVideo().getName(),
+                getCurrentVideo().getSource(),
+                isPaused());
+    }
+
     MediaPlayer buildNewMediaPlayer() {
         player = new MediaPlayer();
         if(subtitleSeeker != null)
@@ -194,6 +211,7 @@ public class MediaService extends Service {
         if(onMediaPlayerBuiltListener != null) {
             onMediaPlayerBuiltListener.onMediaPlayerBuilt(player);
         }
+        updateNotification();
         return player;
     }
 

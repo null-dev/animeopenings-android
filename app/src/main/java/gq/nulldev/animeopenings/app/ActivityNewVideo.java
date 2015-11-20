@@ -63,9 +63,6 @@ public class ActivityNewVideo extends Activity {
     //Subtitles seeker
     SubtitleSeeker subtitleSeeker;
 
-    //MediaNotification
-    MediaNotification notification;
-
     //Backgrounded?
     boolean inBackground = false;
 
@@ -184,16 +181,6 @@ public class ActivityNewVideo extends Activity {
         });
     }
 
-    void updateNotification() {
-        if(notification != null) {
-            notification.cancel();
-        }
-        notification = new MediaNotification(this,
-                mediaService.getCurrentVideo().getName(),
-                mediaService.getCurrentVideo().getSource(),
-                mediaService.isPaused());
-    }
-
     void bindServices() {
         Intent intent = new Intent(this, MediaService.class);
         serviceConnection = new ServiceConnection() {
@@ -294,7 +281,6 @@ public class ActivityNewVideo extends Activity {
         } else {
             playPauseButton.setImageDrawable(getResources().getDrawable(PAUSE_ICON));
         }
-        updateNotification();
     }
 
     void updateSeekMax(int max) {
