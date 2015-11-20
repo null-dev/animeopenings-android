@@ -36,7 +36,9 @@ public class MediaNotification {
         builder.setContent(remoteView);
 
         remoteView.setTextViewText(R.id.title, title);
+        remoteView.setTextColor(R.id.title, android.R.style.TextAppearance_StatusBar_EventContent_Title);
         remoteView.setTextViewText(R.id.details, details);
+        remoteView.setTextColor(R.id.details, android.R.style.TextAppearance_StatusBar_EventContent);
         if(playing) {
             remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_pause);
         } else {
