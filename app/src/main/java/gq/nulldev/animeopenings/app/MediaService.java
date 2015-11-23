@@ -214,10 +214,12 @@ public class MediaService extends Service {
 //        if(notification != null) {
 //            notification.cancel();
 //        }
-        notification = new MediaNotification(this,
-                getCurrentVideo().getName(),
-                getCurrentVideo().getSource(),
-                isPaused());
+        if(getCurrentVideo() != null) {
+            notification = new MediaNotification(this,
+                    getCurrentVideo().getName(),
+                    getCurrentVideo().getSource(),
+                    isPaused());
+        }
     }
 
     MediaPlayer buildNewMediaPlayer() {
@@ -289,6 +291,14 @@ public class MediaService extends Service {
         MediaService getService() {
             return MediaService.this;
         }
+    }
+
+    public SubtitleSeeker getSubtitleSeeker() {
+        return subtitleSeeker;
+    }
+
+    public void setSubtitleSeeker(SubtitleSeeker subtitleSeeker) {
+        this.subtitleSeeker = subtitleSeeker;
     }
 
     @Override

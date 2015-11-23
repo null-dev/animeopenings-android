@@ -189,91 +189,93 @@ public class ActivityNewVideo extends Activity {
     }
 
     void bindServices() {
-        Intent intent = new Intent(this, MediaService.class);
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                mediaService = ((MediaService.MediaBinder) service).getService();
-                mediaService.setOnMediaPlayerBuiltListener(new MediaService.OnMediaPlayerBuiltListener() {
-                    @Override
-                    public void onMediaPlayerBuilt(MediaPlayer mp) {
-                        mp.setDisplay(surfaceView.getHolder());
-                        //Show buffer progress in seekbar
-                        mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                            @Override
-                            public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                                updateSeekBuffered(percent);
-                            }
-                        });
-                        //Show spinny thing when buffering
-                        mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                            @Override
-                            public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                                if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                                    bufferIndicator.setVisibility(View.VISIBLE);
-                                    return true;
-                                } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+        if(mediaService == null) {
+            Intent intent = new Intent(this, MediaService.class);
+            serviceConnection = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    mediaService = ((MediaService.MediaBinder) service).getService();
+                    mediaService.setOnMediaPlayerBuiltListener(new MediaService.OnMediaPlayerBuiltListener() {
+                        @Override
+                        public void onMediaPlayerBuilt(MediaPlayer mp) {
+                            mp.setDisplay(surfaceView.getHolder());
+                            //Show buffer progress in seekbar
+                            mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                                @Override
+                                public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                                    updateSeekBuffered(percent);
+                                }
+                            });
+                            //Show spinny thing when buffering
+                            mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                                @Override
+                                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                                    if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+                                        bufferIndicator.setVisibility(View.VISIBLE);
+                                        return true;
+                                    } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+                                        bufferIndicator.setVisibility(View.GONE);
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                            });
+                            //OnCompletionListener
+                            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    if (preferences.getBoolean("prefLoopVideo", false)) {
+                                        mp.seekTo(0);
+                                        mp.start();
+                                    } else {
+                                        playNextVideo();
+                                    }
+                                }
+                            });
+                            //OnPreparedListener
+                            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(final MediaPlayer mp) {
+                                    //Update seek bar
+                                    updateSeekMax(mp.getDuration());
+                                    //Hide buffer loading indicator
                                     bufferIndicator.setVisibility(View.GONE);
-                                    return true;
-                                }
-                                return false;
-                            }
-                        });
-                        //OnCompletionListener
-                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                if (preferences.getBoolean("prefLoopVideo", false)) {
-                                    mp.seekTo(0);
+                                    final TextView trackInfo = songInfo;
+                                    String trackString = "<b>" + mediaService.getCurrentVideo().getSource() + "</b><br/>" + mediaService.getCurrentVideo().getName();
+                                    if (mediaService.getCurrentVideo().getSubtitleSource() != null) {
+                                        trackString += "<br/>Subtitler: " + mediaService.getCurrentVideo().getSubtitleSource();
+                                    }
+                                    trackInfo.setText(Html.fromHtml(trackString));
                                     mp.start();
-                                } else {
-                                    playNextVideo();
+                                    showControls();
                                 }
-                            }
-                        });
-                        //OnPreparedListener
-                        mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(final MediaPlayer mp) {
-                                //Update seek bar
-                                updateSeekMax(mp.getDuration());
-                                //Hide buffer loading indicator
-                                bufferIndicator.setVisibility(View.GONE);
-                                final TextView trackInfo = songInfo;
-                                String trackString = "<b>" + mediaService.getCurrentVideo().getSource() + "</b><br/>" + mediaService.getCurrentVideo().getName();
-                                if (mediaService.getCurrentVideo().getSubtitleSource() != null) {
-                                    trackString += "<br/>Subtitler: " + mediaService.getCurrentVideo().getSubtitleSource();
-                                }
-                                trackInfo.setText(Html.fromHtml(trackString));
-                                mp.start();
-                                showControls();
-                            }
-                        });
-                    }
-                });
-                mediaService.setupService(videos, subtitleSeeker, PreferenceManager.getDefaultSharedPreferences(ActivityNewVideo.this));
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mediaService.getPlayer() != null && mediaService.getPlayer().isPlaying()) {
-//                            Update seek bar
-                            updateSeekPlayed(mediaService.getPlayer().getCurrentPosition());
-//                            Update played
-                            updatePlaybackRangeText(mediaService.getPlayer().getCurrentPosition(),
-                                    mediaService.getPlayer().getDuration());
+                            });
                         }
-                        handler.postDelayed(this, 500);
-                    }
-                });
-                playNextVideo();
-            }
+                    });
+                    mediaService.setupService(videos, subtitleSeeker, PreferenceManager.getDefaultSharedPreferences(ActivityNewVideo.this));
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mediaService.getPlayer() != null && mediaService.getPlayer().isPlaying()) {
+//                            Update seek bar
+                                updateSeekPlayed(mediaService.getPlayer().getCurrentPosition());
+//                            Update played
+                                updatePlaybackRangeText(mediaService.getPlayer().getCurrentPosition(),
+                                        mediaService.getPlayer().getDuration());
+                            }
+                            handler.postDelayed(this, 500);
+                        }
+                    });
+                    playNextVideo();
+                }
 
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.w("AnimeOpenings", "MediaService disconnected!");
-            }
-        };
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    Log.w("AnimeOpenings", "MediaService disconnected!");
+                }
+            };
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        }
     }
 
     @Override
