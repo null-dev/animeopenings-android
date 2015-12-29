@@ -16,7 +16,7 @@ import java.util.Map;
 public class ActivityPE extends Activity {
 
     ListView listView;
-    ArrayAdapter listAdapter;
+    ArrayAdapter<Map.Entry<String, ?>> listAdapter;
     SharedPreferences preferences;
 
     @Override
@@ -30,12 +30,12 @@ public class ActivityPE extends Activity {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         listView = (ListView) findViewById(R.id.peList);
-        listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList(preferences.getAll().entrySet()));
+        listAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, new ArrayList<Map.Entry<String, ?>>(preferences.getAll().entrySet()));
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final Map.Entry<String, ?> entry = (Map.Entry<String, ?>) listAdapter.getItem(position);
+                final Map.Entry<String, ?> entry = listAdapter.getItem(position);
                 if(entry != null) {
                     LinearLayout view1 = new LinearLayout(instance);
                     view1.setOrientation(LinearLayout.VERTICAL);
