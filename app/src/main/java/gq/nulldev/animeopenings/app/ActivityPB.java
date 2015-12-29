@@ -12,7 +12,10 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ToggleButton;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -37,7 +40,6 @@ public class ActivityPB extends Activity {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         expandableListView = (ExpandableListView) findViewById(R.id.vidList);
-
     }
 
     @Override
@@ -112,43 +114,14 @@ public class ActivityPB extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                String trim = "";
-                if (((EditText) findViewById(R.id.searchText)).getText() != null) {
-                    trim = ((EditText) findViewById(R.id.searchText)).getText().toString().trim();
-                }
-                if (trim.isEmpty()) {
-                    displayingVideos.clear();
-                    displayingVideos.addAll(sortedVideos);
-                } else {
-                    displayingVideos.clear();
-                    boolean useRegex = ((ToggleButton) findViewById(R.id.btnUseRegex)).isChecked();
-                    if (!useRegex) {
-                        String[] split = trim
-                                .toLowerCase(ActivityNewVideo.LOCALE)
-                                .replace("-", " ")
-                                .replace("_", " ")
-                                .replace("*", " ")
-                                .replace("☆", " ")
-                                .replace("\n", " ")
-                                .split(" ");
-                        displayingVideos.addAll(sortedVideos);
-                        for (Video.ListSeriesItem listSeriesItem : sortedVideos) {
-                            for (String splitItem : split) {
-                                if (!listSeriesItem.getName().toLowerCase(ActivityNewVideo.LOCALE).contains(splitItem)) {
-                                    displayingVideos.remove(listSeriesItem);
-                                }
-                            }
-                        }
-                    } else {
-                        try {
-                            for (Video.ListSeriesItem listSeriesItem : sortedVideos) {
-                                if (listSeriesItem.getName().matches(trim)) displayingVideos.add(listSeriesItem);
-                            }
-                        } catch (PatternSyntaxException ignored) {
-                        } //If the user is being an idiot, just ignore him/her
-                    }
-                }
-                updateUI();
+                updateShowingElements();
+            }
+        });
+
+        findViewById(R.id.btnUseRegex).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateShowingElements();
             }
         });
 
@@ -174,6 +147,45 @@ public class ActivityPB extends Activity {
         }
 
         updateUIForPlaylistState(playlistToggle.isChecked());
+    }
+
+    void updateShowingElements() {
+        String trim = "";
+        if (((EditText) findViewById(R.id.searchText)).getText() != null) {
+            trim = ((EditText) findViewById(R.id.searchText)).getText().toString().trim();
+        }
+        if (trim.isEmpty()) {
+            displayingVideos.clear();
+            displayingVideos.addAll(sortedVideos);
+        } else {
+            displayingVideos.clear();
+            boolean useRegex = ((ToggleButton) findViewById(R.id.btnUseRegex)).isChecked();
+            if (!useRegex) {
+                String[] split = trim
+                        .toLowerCase(ActivityNewVideo.LOCALE)
+                        .replace("-", " ")
+                        .replace("_", " ")
+                        .replace("*", " ")
+                        .replace("☆", " ") //:P
+                        .replace("\n", " ")
+                        .split(" ");
+                displayingVideos.addAll(sortedVideos);
+                for (Video.ListSeriesItem listSeriesItem : sortedVideos) {
+                    for (String splitItem : split) {
+                        if (!listSeriesItem.getName().toLowerCase(ActivityNewVideo.LOCALE).contains(splitItem)) {
+                            displayingVideos.remove(listSeriesItem);
+                        }
+                    }
+                }
+            } else {
+                try {
+                    for (Video.ListSeriesItem listSeriesItem : sortedVideos) {
+                        if (listSeriesItem.getName().matches(trim)) displayingVideos.add(listSeriesItem);
+                    }
+                } catch (PatternSyntaxException ignored) {} //If the user is being an idiot, just ignore him/her
+            }
+        }
+        updateUI();
     }
 
     void updateUI() {

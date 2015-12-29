@@ -3,11 +3,19 @@ package gq.nulldev.animeopenings.app;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import subtitleFile.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
+import subtitleFile.FormatASS;
+import subtitleFile.TimedTextObject;
 
+/**
+ * Converts subtitles to a parsable format.
+ */
 public class Convert {
 
     static OkHttpClient client = new OkHttpClient();

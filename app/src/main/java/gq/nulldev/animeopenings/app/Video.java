@@ -67,11 +67,13 @@ public class Video {
                 video.setFilenameSplit(split[0]);
 
                 //Add subtitles
-                String subs = object.getString("subtitles");
-                if(subs != null && !subs.equals("0")) {
-                    video.setSubtitleSource(subs);
-                    video.setSubtitleURL(SUBTITLE_URL_BASE + video.getFilenameSplit() + SUBTITLE_EXT);
-                }
+                try {
+                    String subs = object.getString("subtitles");
+                    if (subs != null && !subs.equals("0")) {
+                        video.setSubtitleSource(subs);
+                        video.setSubtitleURL(SUBTITLE_URL_BASE + video.getFilenameSplit() + SUBTITLE_EXT);
+                    }
+                } catch(JSONException ignored) {} //No subtitles element.
             }
 
             videos.add(video);

@@ -54,7 +54,8 @@
         android:id="@+id/btnSelNone"
         android:layout_alignTop="@+id/btnEnablePlaylist"
         android:layout_toRightOf="@+id/textView2"
-        android:layout_toEndOf="@+id/textView2" />
+        android:layout_toEndOf="@+id/textView2"
+        android:layout_alignParentBottom="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -91,5 +92,6 @@
         android:layout_marginRight="5dp"
         android:layout_alignTop="@+id/btnSelNone"
         android:layout_centerVertical="true"
-        android:gravity="center" />
+        android:gravity="center"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>

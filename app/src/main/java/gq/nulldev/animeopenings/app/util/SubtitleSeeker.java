@@ -1,9 +1,7 @@
 package gq.nulldev.animeopenings.app.util;
 
 import android.media.MediaPlayer;
-import android.util.Log;
 import android.widget.TextView;
-import gq.nulldev.animeopenings.app.ActivityNewVideo;
 import subtitleFile.Caption;
 import subtitleFile.TimedTextObject;
 
@@ -26,7 +24,7 @@ public class SubtitleSeeker {
     int delay = 250;
 
     int prevTime = 0;
-    MediaPlayer view = null;
+    MediaPlayer player = null;
     TimedTextObject textObject;
     TextView subView = null;
     Timer timer;
@@ -34,11 +32,11 @@ public class SubtitleSeeker {
 
     /**
      * Construct a subtitle seeker
-     * @param view The video view to sync with
+     * @param player The video view to sync with
      * @param subView The text view to display subtitles on
      */
-    public SubtitleSeeker(MediaPlayer view, TextView subView) {
-        this.view = view;
+    public SubtitleSeeker(MediaPlayer player, TextView subView) {
+        this.player = player;
         this.subView = subView;
     }
 
@@ -62,12 +60,12 @@ public class SubtitleSeeker {
      * Get the VideoView to sync the subtitles with
      * @return The VideoView to sync the subtitles with
      */
-    public MediaPlayer getView() {
-        return view;
+    public MediaPlayer getPlayer() {
+        return player;
     }
 
-    public void setView(MediaPlayer view) {
-        this.view = view;
+    public void setPlayer(MediaPlayer player) {
+        this.player = player;
     }
 
     /**
@@ -111,6 +109,7 @@ public class SubtitleSeeker {
         prevTime = 0;
         this.textObject = null;
         this.captionList.clear();
+        updateTextView("");
     }
 
     /**
@@ -140,16 +139,17 @@ public class SubtitleSeeker {
                 //Get the current position
                 int currentPosition;
                 try {
-                    currentPosition = view.getCurrentPosition();
+                    currentPosition = player.getCurrentPosition();
                 } catch(IllegalStateException e) {
-                    Log.i(ActivityNewVideo.TAG, "Mediaplayer in illegal state!", e);
                     return;
                 }
                 //Check if the user is seeking around
                 if(currentPosition < prevTime) {
                     //Re-add all the removed subtitles
                     captionList.clear();
-                    captionList.addAll(textObject.captions.values());
+                    if(textObject != null && textObject.captions != null) {
+                        captionList.addAll(textObject.captions.values());
+                    }
                 }
                 //We may have multiple captions so a StringBuilder is more faster and suitable
                 StringBuilder captionBuilder = new StringBuilder();
