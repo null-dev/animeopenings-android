@@ -6,15 +6,12 @@ Native android client for openings.moe! (http://nulldev.xyz/apps/)
 Original 'openings.moe' by AniDev: https://github.com/AniDevTwitter/animeopenings
 
 # Features
-- Very basic subtitle support<sup>+* (Quad changed the API which is causing problems, I'll fix it later)</sup>
-- Playlist builder<sup>*<sup>
-- Easter eggs<sup>*</sup>
+- Very basic subtitle support
+- Playlist builder
+- Easter eggs
 - Background and screen-off play
 - All other features included in web version
 - Gesture controls
-
-<sub>* not in release version</sub><br>
-<sub>+ broken in dev version</sub>
 
 # Status
 Dev version (version in repo) is currently almost a complete rewrite of the old app and is very buggy.
