@@ -28,8 +28,8 @@ android {
         applicationId "gq.nulldev.animeopenings.app"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 320
-        versionName "3.2"
+        versionCode 321
+        versionName "3.21"
     }
     buildTypes {
         release {

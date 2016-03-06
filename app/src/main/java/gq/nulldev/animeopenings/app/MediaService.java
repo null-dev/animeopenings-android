@@ -66,7 +66,7 @@ public class MediaService extends Service {
     }
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
-        if(preferences.getBoolean("prefCacheVideos", true)) {
+        if(preferences.getBoolean("prefCacheVideos", false)) {
             HttpProxyCacheServer proxy = getProxy(context,
                     preferences.getInt("prefCacheLimit", 512)*1000000);
             return proxy.getProxyUrl(url);

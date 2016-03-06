@@ -24,7 +24,7 @@
     <string name="pref_eastereggs_sum">:P</string>
 
     <string name="pref_cache_videos">Enable Video Caching</string>
-    <string name="pref_cache_videos_sum">Keep some played videos on your device to reduce data usage.</string>
+    <string name="pref_cache_videos_sum">Keep some played videos on your device to reduce data usage. Disable this if videos play slower.</string>
     
     <string name="pref_openpe">Advanced Preferences</string>
     <string name="pref_openpe_sum">For advanced users only! Opens SharedPreferences editor.</string>
