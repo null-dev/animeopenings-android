@@ -60,4 +60,6 @@
     <string name="not_prev">Previous Video</string>
     <string name="pref_cache_limit">Maximum Cache Size (MB)</string>
     <string name="pref_cache_limit_sum">The maximum amount of space which the cache will use in megabytes.</string>
+    <string name="pref_audio_only_sum">Play audio only. Uses less CPU power and network bandwidth. Audio-only versions provided by: omam.nulldev.xyz</string>
+    <string name="pref_audio_only">Audio Only</string>
 </resources>

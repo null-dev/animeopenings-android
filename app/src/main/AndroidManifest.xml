@@ -56,6 +56,7 @@
                 <action android:name="gq.nulldev.animeopenings.app.ACTION_PREV" />
                 <action android:name="gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE" />
                 <action android:name="gq.nulldev.animeopenings.app.ACTION_NEXT" />
+                <action android:name="gq.nulldev.animeopenings.app.ACTION_EXIT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>

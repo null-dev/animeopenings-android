@@ -25,22 +25,23 @@ public class MediaNotification {
     public MediaNotification(Context context, String title, String details, boolean paused) {
         this.context = context;
         //Get notification manager
-        if(remoteView == null) {
+        if (remoteView == null) {
             remoteView = new RemoteViews(context.getPackageName(), R.layout.notification_music);
             setListeners(remoteView);
         }
-        if(builder == null) {
+        if (builder == null) {
             builder = new NotificationCompat.Builder(context)
                     .setContentTitle("Music Controller")
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .setOngoing(true);
+                    .setOngoing(false)
+                    .setDeleteIntent(PendingIntent.getService(context, 3, new Intent(MediaService.ACTION_EXIT), PendingIntent.FLAG_UPDATE_CURRENT));
             //set the button listeners
             builder.setContent(remoteView);
         }
 
         remoteView.setTextViewText(R.id.title, title);
         remoteView.setTextViewText(R.id.details, details);
-        if(!paused) {
+        if (!paused) {
             remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_pause);
         } else {
             remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_play);
@@ -54,13 +55,12 @@ public class MediaNotification {
         builder.setContentIntent(launchMainAppPE);
 
         notificationManager.notify(2, builder.build());
-
     }
 
-    public void setListeners(RemoteViews view){
-        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PREV", 0, R.id.btnPrev);
-        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE", 1, R.id.btnPlayPause);
-        linkIntentToButton(view, "gq.nulldev.animeopenings.app.ACTION_NEXT", 2, R.id.btnNext);
+    public void setListeners(RemoteViews view) {
+        linkIntentToButton(view, MediaService.ACTION_PREV, 0, R.id.btnPrev);
+        linkIntentToButton(view, MediaService.ACTION_PLAYPAUSE, 1, R.id.btnPlayPause);
+        linkIntentToButton(view, MediaService.ACTION_NEXT, 2, R.id.btnNext);
     }
 
     void linkIntentToButton(RemoteViews view, String action, int requestCode, int button) {

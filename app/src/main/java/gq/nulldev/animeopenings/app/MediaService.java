@@ -9,13 +9,15 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+
 import com.danikula.videocache.HttpProxyCacheServer;
-import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
+
+import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
 /**
  * Project: AnimeOpenings
@@ -27,6 +29,7 @@ public class MediaService extends Service {
     public static final String ACTION_PREV = "gq.nulldev.animeopenings.app.ACTION_PREV";
     public static final String ACTION_PLAYPAUSE = "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE";
     public static final String ACTION_NEXT = "gq.nulldev.animeopenings.app.ACTION_NEXT";
+    public static final String ACTION_EXIT = "gq.nulldev.animeopenings.app.ACTION_EXIT";
 
     static HttpProxyCacheServer proxyCacheServer;
     static long previousProxyCacheSize = -1;
@@ -87,6 +90,12 @@ public class MediaService extends Service {
                     case ACTION_NEXT:
                         doNext();
                         break;
+                    case ACTION_EXIT:
+                        if(getPlayer() != null) {
+                            getPlayer().stop();
+                            getPlayer().release();
+                            player = null;
+                        }
                 }
             }
         }
@@ -132,14 +141,18 @@ public class MediaService extends Service {
         if(player != null) {
             player.reset();
         }
-        Log.i(ActivityNewVideo.TAG, "Playing video: " + vid.getFileURL());
+        String url = vid.getFileURL();
+        if(preferences.getBoolean("prefAudioOnly", false)) {
+            url = "http://omam.nulldev.xyz/" + vid.getFile() + ".ogg";
+        }
+        Log.i(ActivityNewVideo.TAG, "Playing media: " + url);
 
         paused = false;
 
         try {
             if(player == null)
                 buildNewMediaPlayer();
-            player.setDataSource(this, Uri.parse(proxyURL(this, preferences, vid.getFileURL())));
+            player.setDataSource(this, Uri.parse(proxyURL(this, preferences, url)));
             player.prepareAsync();
         } catch(Exception ignored) {}
         updateNotification();
