@@ -2,28 +2,48 @@ package gq.nulldev.animeopenings.app;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.*;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
-import android.view.*;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.*;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import com.crashlytics.android.Crashlytics;
-import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
-import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
-import io.fabric.sdk.android.Fabric;
+
 import org.json.JSONException;
-import subtitleFile.TimedTextObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
+import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
+import io.fabric.sdk.android.Fabric;
+import subtitleFile.TimedTextObject;
 
 public class ActivityNewVideo extends Activity {
     public final static String TAG = "AnimeOpenings";
@@ -164,6 +184,7 @@ public class ActivityNewVideo extends Activity {
                     int position = mediaService.getPlayer().getCurrentPosition();
                     mediaService.playVideo(mediaService.getCurrentVideo());
                     mediaService.getPlayer().seekTo(position);
+                    mediaService.getPlayer().setDisplay(holder);
                 }
             }
 
