@@ -4,7 +4,7 @@ buildscript {
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:1.5.0'
         classpath 'io.fabric.tools:gradle:1.20.1'
     }
 }
@@ -22,14 +22,14 @@ repositories {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "gq.nulldev.animeopenings.app"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 300
-        versionName "3.0"
+        versionCode 310
+        versionName "3.1"
     }
     buildTypes {
         release {
@@ -44,7 +44,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.danikula:videocache:2.3.3'
     //compile 'com.github.paolorotolo:appintro:3.2.0'
