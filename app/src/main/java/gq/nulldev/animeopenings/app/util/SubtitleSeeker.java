@@ -2,13 +2,14 @@ package gq.nulldev.animeopenings.app.util;
 
 import android.media.MediaPlayer;
 import android.widget.TextView;
-import subtitleFile.Caption;
-import subtitleFile.TimedTextObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import subtitleFile.Caption;
+import subtitleFile.TimedTextObject;
 
 /**
  * Project: SubtitleSeeker
@@ -155,14 +156,19 @@ public class SubtitleSeeker {
                 StringBuilder captionBuilder = new StringBuilder();
                 //Go through all captions to display
                 Iterator<Caption> captionIterator = captionList.iterator();
+                //Store a list of subtitles to prevent duplicates
+                ArrayList<String> appended = new ArrayList<>();
                 while (captionIterator.hasNext()) {
                     Caption caption = captionIterator.next();
                     if (caption.start.getMseconds() <= currentPosition && caption.end.getMseconds() >= currentPosition) {
-                        //Append the caption
-                        if (captionBuilder.length() > 0) {
-                            captionBuilder.append('\n');
+                        if(!appended.contains(caption.content)) {
+                            //Append the caption
+                            if (captionBuilder.length() > 0) {
+                                captionBuilder.append('\n');
+                            }
+                            captionBuilder.append(caption.content);
+                            appended.add(caption.content);
                         }
-                        captionBuilder.append(caption.content);
                     } else {
                         //Remove captions behind our current position
                         if(caption.start.getMseconds() < currentPosition && caption.end.getMseconds() < currentPosition) {

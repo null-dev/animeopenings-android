@@ -2,9 +2,11 @@ package gq.nulldev.animeopenings.app;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
+
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +14,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -68,10 +71,10 @@ public class Video {
 
                 //Add subtitles
                 try {
+                    video.setSubtitleURL(SUBTITLE_URL_BASE + video.getFilenameSplit() + SUBTITLE_EXT);
                     String subs = object.getString("subtitles");
                     if (subs != null && !subs.equals("0")) {
                         video.setSubtitleSource(subs);
-                        video.setSubtitleURL(SUBTITLE_URL_BASE + video.getFilenameSplit() + SUBTITLE_EXT);
                     }
                 } catch(JSONException ignored) {} //No subtitles element.
             }
@@ -83,7 +86,20 @@ public class Video {
     }
 
     public static Video getRandomVideo(ArrayList<Video> videos) {
-        return videos.get(random.nextInt(videos.size()));
+        LinkedHashMap<String, ArrayList<Video>> seriesMap = new LinkedHashMap<>();
+        for(Video vid : videos) {
+            ArrayList<Video> seriesData;
+            if(seriesMap.containsKey(vid.getSource())) {
+                seriesData = seriesMap.get(vid.getSource());
+            } else {
+                seriesData = new ArrayList<>();
+                seriesMap.put(vid.getSource(), seriesData);
+            }
+            seriesData.add(vid);
+        }
+        ArrayList<ArrayList<Video>> seriesList = new ArrayList<>(seriesMap.values());
+        ArrayList<Video> resultingSeries = seriesList.get(random.nextInt(seriesList.size()));
+        return resultingSeries.get(random.nextInt(resultingSeries.size()));
     }
 
     public Video(String name, String source, String file) {

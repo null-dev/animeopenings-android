@@ -32,11 +32,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -82,9 +88,6 @@ public class ActivityNewVideo extends Activity {
 
     //Subtitles seeker
     SubtitleSeeker subtitleSeeker;
-
-    //Backgrounded?
-    boolean inBackground = false;
 
     public final static int PLAY_ICON = android.R.drawable.ic_media_play;
     public final static int PAUSE_ICON = android.R.drawable.ic_media_pause;
@@ -179,7 +182,7 @@ public class ActivityNewVideo extends Activity {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                if(mediaService != null && mediaService.getPlayer()  != null) {
+                if (mediaService != null && mediaService.getPlayer() != null) {
                     Log.i(TAG, "Surface re-created, restoring MediaPlayer state!");
                     int position = mediaService.getPlayer().getCurrentPosition();
                     mediaService.playVideo(mediaService.getCurrentVideo());
@@ -189,11 +192,12 @@ public class ActivityNewVideo extends Activity {
             }
 
             @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                if (mediaService.getPlayer() != null) {
+                if (mediaService != null && mediaService.getPlayer() != null) {
                     mediaService.getPlayer().setDisplay(null);
                 }
             }
@@ -210,7 +214,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     void bindServices() {
-        if(mediaService == null) {
+        if (mediaService == null) {
             Intent intent = new Intent(this, MediaService.class);
             serviceConnection = new ServiceConnection() {
                 @Override
@@ -261,14 +265,8 @@ public class ActivityNewVideo extends Activity {
                                     updateSeekMax(mp.getDuration());
                                     //Hide buffer loading indicator
                                     bufferIndicator.setVisibility(View.GONE);
-                                    final TextView trackInfo = songInfo;
-                                    String trackString = "<b>" + mediaService.getCurrentVideo().getSource() + "</b><br/>" + mediaService.getCurrentVideo().getName();
-                                    if (mediaService.getCurrentVideo().getSubtitleSource() != null) {
-                                        trackString += "<br/>Subtitler: " + mediaService.getCurrentVideo().getSubtitleSource();
-                                    }
-                                    trackInfo.setText(Html.fromHtml(trackString));
+                                    updateTrackString(mediaService.getCurrentVideo(), getVideoDetails(mediaService.getCurrentVideo(), true));
                                     mp.start();
-                                    showControls();
                                 }
                             });
                         }
@@ -299,6 +297,15 @@ public class ActivityNewVideo extends Activity {
         }
     }
 
+    public void updateTrackString(Video vid, VideoDetails details) {
+        String trackString = "<b>" + vid.getSource() + "</b><br/>" + vid.getName();
+        if (details != null && details.getSubtitles() != null) {
+            trackString += "<br/>Subtitler: " + details.getSubtitles();
+        }
+        songInfo.setText(Html.fromHtml(trackString));
+        showControls();
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -320,13 +327,13 @@ public class ActivityNewVideo extends Activity {
     void updateSeekBuffered(int buffered) {
         int amountBuffered = buffered;
         //Division by zero protection
-        if(amountBuffered < 1)
+        if (amountBuffered < 1)
             amountBuffered = 1;
         seekBar.setSecondaryProgress((amountBuffered / 100) * seekBar.getMax());
     }
 
     void updateSeekPlayed(int percent) {
-        if(mediaService.getPlayer() != null) {
+        if (mediaService.getPlayer() != null) {
             seekBar.setProgress(percent);
         }
     }
@@ -345,7 +352,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     void toggleControls() {
-        if(controlsBar.getVisibility() == View.VISIBLE) {
+        if (controlsBar.getVisibility() == View.VISIBLE) {
             hideControls();
         } else {
             showControls();
@@ -354,7 +361,7 @@ public class ActivityNewVideo extends Activity {
 
     void showControls() {
         //Cancel any previous hide tasks
-        if(hideControlsTask != null) {
+        if (hideControlsTask != null) {
             hideControlsTask.cancel();
         }
         songInfo.setAlpha(1);
@@ -372,7 +379,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     void hideControls() {
-        if(hideControlsTask != null) {
+        if (hideControlsTask != null) {
             hideControlsTask.cancel();
         }
         songInfo.setAlpha(0);
@@ -388,7 +395,7 @@ public class ActivityNewVideo extends Activity {
     }
 
     void playPrevVideo() {
-        if(!mediaService.doPrev()) {
+        if (!mediaService.doPrev()) {
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -408,7 +415,7 @@ public class ActivityNewVideo extends Activity {
     void afterPlayVideo() {
         bufferIndicator.setVisibility(View.VISIBLE);
         //Enable subtitles if possible
-        if(preferences.getBoolean("prefSubtitles", true) && mediaService.getCurrentVideo().getSubtitleSource() != null) {
+        if (preferences.getBoolean("prefSubtitles", true)) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -419,17 +426,56 @@ public class ActivityNewVideo extends Activity {
         updatePlayPauseButton();
     }
 
-    public void goSubtitles(Video vid) {
+    HashMap<String, VideoDetails> detailsCache = new HashMap<>();
+    OkHttpClient client = new OkHttpClient();
+
+    public VideoDetails getVideoDetails(Video vid, boolean cacheOnly) {
+        String detailsURL;
         try {
-            Log.i(TAG, "Preparing subtitles for video: " + vid.getFileURL());
-            final TimedTextObject converted = Convert.downloadAndParseSubtitle(vid.getSubtitleURL(), vid.getFilenameSplit(), getCacheDir());
-            if(converted == null) {
-                throw new IOException("Subtitles are null!");
+            detailsURL = "http://openings.moe/api/details.php?file=" + URLEncoder.encode(vid.getFile(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException();
+        }
+
+        VideoDetails out;
+        if (detailsCache.containsKey(detailsURL)) {
+            out = detailsCache.get(detailsURL);
+        } else {
+            if(cacheOnly) {
+                return null;
             }
-            subtitleSeeker.sync(converted);
-        } catch(Throwable t) {
-            Log.w(TAG, "Subtitle parse/download error!", t);
-            Crashlytics.logException(t);
+            try {
+                Response response = client.newCall(new Request.Builder().url(detailsURL).build()).execute();
+                out = VideoDetails.fromJSON(response.body().string());
+            } catch (IOException e) {
+                Log.w(TAG, "Video details download error!", e);
+                return null;
+            }
+            if (out != null)
+                detailsCache.put(detailsURL, out);
+        }
+        return out;
+    }
+
+    public void goSubtitles(final Video vid) {
+        final VideoDetails details = getVideoDetails(vid, false);
+        if(details != null && details.getSubtitles() != null) {
+            try {
+                Log.i(TAG, "Preparing subtitles for video: " + vid.getFileURL());
+                final TimedTextObject converted = Convert.downloadAndParseSubtitle(vid.getSubtitleURL(), vid.getFilenameSplit(), getCacheDir());
+                if (converted == null) {
+                    throw new IOException("Subtitles are null!");
+                }
+                subtitleSeeker.sync(converted);
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        updateTrackString(vid, details);
+                    }
+                });
+            } catch (Throwable t) {
+                Log.w(TAG, "Subtitle parse/download error!", t);
+                Crashlytics.logException(t);
+            }
         }
     }
 
@@ -454,7 +500,7 @@ public class ActivityNewVideo extends Activity {
         super.onDestroy();
 
         INSTANCE = null;
-        if(serviceConnection != null) {
+        if (serviceConnection != null) {
             unbindService(serviceConnection);
         }
     }
@@ -524,7 +570,7 @@ class HideControlsTask implements Runnable {
 
     @Override
     public void run() {
-        if(!canceled) {
+        if (!canceled) {
             animateView(controlsBar);
             animateView(songInfo);
             animateView(topButtonBar);
@@ -539,11 +585,12 @@ class HideControlsTask implements Runnable {
         anim.setDuration(1000);
         anim.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if(!canceled) {
+                if (!canceled) {
                     view.setAlpha(0);
                     view.setVisibility(View.GONE);
                     view.invalidate();
@@ -552,7 +599,8 @@ class HideControlsTask implements Runnable {
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {
+            }
         });
         view.startAnimation(anim);
     }
@@ -588,7 +636,7 @@ class GetVideosTask extends AsyncTask<Void, Void, ArrayList<Video>> {
     @Override
     protected void onPostExecute(ArrayList<Video> videos) {
         super.onPostExecute(videos);
-        if(videos != null) {
+        if (videos != null) {
 //            Log.d(LOG_TAG, Arrays.toString(videos.toArray()));
             dialog.dismiss();
             activityNewVideo.videos = videos;
