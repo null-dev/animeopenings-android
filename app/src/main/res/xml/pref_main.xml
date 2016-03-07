@@ -66,6 +66,11 @@
             android:summary="@string/pref_openpe_sum"/>
     </PreferenceCategory>
 
-    <gq.nulldev.animeopenings.app.util.VersionPreference android:title="@string/pref_version" />
+    <PreferenceCategory android:title="@string/pref_misc_category">
+        <gq.nulldev.animeopenings.app.util.ShowTutorialPref
+            android:title="@string/pref_controls_help"
+            android:summary="@string/pref_controls_help_sum"/>
+        <gq.nulldev.animeopenings.app.util.VersionPreference android:title="@string/pref_version" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

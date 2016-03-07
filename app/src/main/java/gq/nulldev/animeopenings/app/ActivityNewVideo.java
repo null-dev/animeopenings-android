@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 
 import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
+import gq.nulldev.animeopenings.app.util.TutorialView;
 import subtitleFile.TimedTextObject;
 
 public class ActivityNewVideo extends Activity {
@@ -493,6 +494,21 @@ public class ActivityNewVideo extends Activity {
         INSTANCE = null;
         if (serviceConnection != null) {
             unbindService(serviceConnection);
+        }
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        //Show tutorial if required
+        if(preferences.getBoolean(TutorialView.PREF_SHOW_CONTROLS_TUTORIAL, true)) {
+            final TutorialView tutorialView = (TutorialView) findViewById(R.id.tutorialView);
+            tutorialView.setOnDoneListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    tutorialView.setVisibility(View.GONE);
+                    preferences.edit().putBoolean(TutorialView.PREF_SHOW_CONTROLS_TUTORIAL, false).apply();
+                }
+            });
+            tutorialView.setVisibility(View.VISIBLE);
         }
     }
 }

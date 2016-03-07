@@ -84,7 +84,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:id="@+id/lowerBtnBar">
+        android:id="@+id/lowerBtnBar"
+        >
 
         <TextView
             android:layout_width="wrap_content"
@@ -118,5 +119,13 @@
             android:clickable="true"
             android:layout_gravity="center_vertical|right" />
     </LinearLayout>
+
+    <gq.nulldev.animeopenings.app.util.TutorialView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/tutorialView"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>
