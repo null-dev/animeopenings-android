@@ -31,7 +31,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -48,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 
 import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
-import io.fabric.sdk.android.Fabric;
 import subtitleFile.TimedTextObject;
 
 public class ActivityNewVideo extends Activity {
@@ -98,9 +96,6 @@ public class ActivityNewVideo extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        //Initialize fabric
-        Fabric.with(this, new Crashlytics());
-
         super.onCreate(savedInstanceState);
 
         //Inflate XML
@@ -471,7 +466,6 @@ public class ActivityNewVideo extends Activity {
                 });
             } catch (Throwable t) {
                 Log.w(TAG, "Subtitle parse/download error!", t);
-                Crashlytics.logException(t);
             }
         }
     }
