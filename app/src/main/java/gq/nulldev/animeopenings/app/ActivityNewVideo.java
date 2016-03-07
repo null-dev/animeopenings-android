@@ -184,9 +184,6 @@ public class ActivityNewVideo extends Activity {
             public void surfaceCreated(SurfaceHolder holder) {
                 if (mediaService != null && mediaService.getPlayer() != null) {
                     Log.i(TAG, "Surface re-created, restoring MediaPlayer state!");
-                    int position = mediaService.getPlayer().getCurrentPosition();
-                    mediaService.playVideo(mediaService.getCurrentVideo());
-                    mediaService.getPlayer().seekTo(position);
                     mediaService.getPlayer().setDisplay(holder);
                 }
             }
