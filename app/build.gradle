@@ -7,6 +7,12 @@ buildscript {
     }
 }
 
+//Skip lint
+tasks.whenTaskAdded { task ->
+    if (task.name.equals("lintVitalRelease")) {
+        task.enabled = false
+    }
+}
 apply plugin: 'com.android.application'
 
 repositories {
@@ -24,8 +30,8 @@ android {
         applicationId "gq.nulldev.animeopenings.app"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 322
-        versionName "3.22"
+        versionCode 323
+        versionName "3.2.3"
     }
     buildTypes {
         release {
