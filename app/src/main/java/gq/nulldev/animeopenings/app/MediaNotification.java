@@ -42,9 +42,9 @@ public class MediaNotification {
         remoteView.setTextViewText(R.id.title, title);
         remoteView.setTextViewText(R.id.details, details);
         if (!paused) {
-            remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_pause);
+            remoteView.setImageViewResource(R.id.btnPlayPause, R.drawable.ic_pause_24dp);
         } else {
-            remoteView.setImageViewResource(R.id.btnPlayPause, android.R.drawable.ic_media_play);
+            remoteView.setImageViewResource(R.id.btnPlayPause, R.drawable.ic_play_arrow_24dp);
         }
 
         notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

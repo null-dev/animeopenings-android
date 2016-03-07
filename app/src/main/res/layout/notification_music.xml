@@ -12,36 +12,46 @@
         android:layout_height="fill_parent"
         android:id="@+id/btnPrev"
         android:layout_gravity="center_vertical|right"
-        android:src="@android:drawable/ic_media_previous"
+        android:src="@drawable/ic_skip_next_24dp"
         android:layout_toLeftOf="@+id/btnPlayPause"
         android:layout_toStartOf="@+id/btnPlayPause"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:contentDescription="@string/not_prev" />
+        android:contentDescription="@string/not_prev"
+        android:background="?android:selectableItemBackground"
+        android:rotation="180"
+        android:clickable="true"
+        android:padding="8dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:id="@+id/btnPlayPause"
         android:layout_gravity="center_vertical|right"
-        android:src="@android:drawable/ic_media_play"
+        android:src="@drawable/ic_play_arrow_24dp"
         android:layout_toLeftOf="@+id/btnNext"
         android:layout_toStartOf="@+id/btnNext"
         android:layout_alignParentTop="true"
         android:layout_alignParentBottom="true"
-        android:contentDescription="@string/not_playpause" />
+        android:contentDescription="@string/not_playpause"
+        android:background="?android:selectableItemBackground"
+        android:clickable="true"
+        android:padding="8dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:id="@+id/btnNext"
         android:layout_gravity="center_vertical|right"
-        android:src="@android:drawable/ic_media_next"
+        android:src="@drawable/ic_skip_next_24dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:contentDescription="@string/not_next" />
+        android:contentDescription="@string/not_next"
+        android:background="?android:selectableItemBackground"
+        android:clickable="true"
+        android:padding="8dp"/>
 
     <LinearLayout
         android:orientation="horizontal"
