@@ -87,7 +87,7 @@
             android:layout_toLeftOf="@+id/btnPrev"
             android:layout_toStartOf="@+id/btnPrev"
             android:paddingLeft="8dp"
-            android:background="#00ff00">
+            >
 
             <TextView
                 android:id="@+id/title"
