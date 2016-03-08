@@ -264,6 +264,12 @@ public class ActivityNewVideo extends Activity {
                             });
                         }
                     });
+                    //Finish activity on notification dismiss
+                    mediaService.setOnStopListener(new Runnable() {
+                        @Override public void run() {
+                            finish();
+                        }
+                    });
                     mediaService.setupService(videos, subtitleSeeker, PreferenceManager.getDefaultSharedPreferences(ActivityNewVideo.this));
                     runOnUiThread(new Runnable() {
                         @Override

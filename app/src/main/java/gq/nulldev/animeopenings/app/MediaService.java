@@ -41,6 +41,7 @@ public class MediaService extends Service {
     SubtitleSeeker subtitleSeeker = null;
     SharedPreferences preferences;
     OnMediaPlayerBuiltListener onMediaPlayerBuiltListener;
+    Runnable onStopListener = null;
     int playlistIndex = 0;
     boolean paused = false;
 
@@ -95,6 +96,9 @@ public class MediaService extends Service {
                             getPlayer().stop();
                             getPlayer().release();
                             player = null;
+                            if(onStopListener != null)
+                                onStopListener.run();
+                            stopSelf();
                         }
                 }
             }
@@ -317,6 +321,14 @@ public class MediaService extends Service {
 
     public void setSubtitleSeeker(SubtitleSeeker subtitleSeeker) {
         this.subtitleSeeker = subtitleSeeker;
+    }
+
+    public Runnable getOnStopListener() {
+        return onStopListener;
+    }
+
+    public void setOnStopListener(Runnable onStopListener) {
+        this.onStopListener = onStopListener;
     }
 
     @Override
