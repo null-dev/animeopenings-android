@@ -113,7 +113,12 @@ public class MediaService extends Service {
                 player.start();
                 paused = false;
             } else {
-                player.pause();
+                try {
+                    player.pause();
+                } catch(IllegalStateException e) {
+                    //Cannot pause while player is buffering, just stop the player entirely
+                    player.stop();
+                }
                 paused = true;
             }
         }
