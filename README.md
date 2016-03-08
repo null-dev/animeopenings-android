@@ -16,8 +16,7 @@ Original 'openings.moe' by AniDev: https://github.com/AniDevTwitter/animeopening
 - Audio-only play
 
 # Status
-Dev version (version in repo) is currently almost a complete rewrite of the old app and is very buggy.
-If you are actually going to use this, I recommend downloading the release version instead.
+Dev version (version in repo) is currently almost a complete rewrite of the old app and is ~~very buggy~~ now mostly stable.
 
 # TODO List
 - Fix all bugs in new dev version
