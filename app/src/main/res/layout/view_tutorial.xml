@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Controls"
+        android:text="@string/view_ctut_controls"
         android:id="@+id/textView3"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Swipe left for\nprevious video"
+            android:text="@string/view_ctut_swipeleft"
             android:id="@+id/textView4"
             android:textColor="#ffffff"
             android:gravity="center_horizontal"/>
@@ -90,7 +90,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Swipe right for\nnext video"
+            android:text="@string/view_ctut_swiperight"
             android:id="@+id/textView5"
             android:textColor="#ffffff"
             android:gravity="center_horizontal"/>
@@ -116,7 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Tap to hide/show\ncontrols"
+            android:text="@string/view_ctut_tap"
             android:id="@+id/textView6"
             android:textColor="#ffffff"
             android:gravity="center_horizontal"/>
