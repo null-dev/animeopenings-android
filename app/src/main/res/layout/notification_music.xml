@@ -77,7 +77,7 @@
             />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/linearLayout"
@@ -86,7 +86,8 @@
             android:layout_toRightOf="@+id/imagenotileft"
             android:layout_toLeftOf="@+id/btnPrev"
             android:layout_toStartOf="@+id/btnPrev"
-            android:paddingLeft="8dp">
+            android:paddingLeft="8dp"
+            android:background="#00ff00">
 
             <TextView
                 android:id="@+id/title"
