@@ -70,7 +70,7 @@
             android:src="@android:drawable/ic_menu_preferences"
             android:background="@drawable/flat_button"
             android:padding="5dp"
-            android:contentDescription="Settings Button"
+            android:contentDescription="@string/activity_nv_settings_button_desc"
             android:clickable="true" />
     </LinearLayout>
 
@@ -115,7 +115,7 @@
             android:background="@drawable/flat_button_default_trans"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:contentDescription="Play Button"
+            android:contentDescription="@string/activity_nv_play_button_desc"
             android:clickable="true"
             android:layout_gravity="center_vertical|right" />
     </LinearLayout>

@@ -69,4 +69,6 @@
     <string name="view_ctut_swipeleft">Swipe left for\nprevious video</string>
     <string name="view_ctut_swiperight">Swipe right for\nnext video</string>
     <string name="view_ctut_tap">Tap to hide/show\ncontrols</string>
+    <string name="activity_nv_play_button_desc">Play Button</string>
+    <string name="activity_nv_settings_button_desc">Settings Button</string>
 </resources>
