@@ -12,6 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,6 +32,7 @@ public class Video {
     public static final String LIST_URL = "http://" + BASE_URL + "/api/list.php";
     public static final String VIDEO_URL_BASE = "http://" + BASE_URL + "/video/";
     public static final String SUBTITLE_URL_BASE = "http://" + BASE_URL + "/subtitles/";
+    public static final String BROWSER_URL_BASE = "http://" + BASE_URL + "/?video=";
     public static final String EGG_APPEND = "?eggs";
 
     public static final String SUBTITLE_EXT = ".ass";
@@ -158,6 +161,14 @@ public class Video {
 
     public void setFilenameSplit(String filenameSplit) {
         this.filenameSplit = filenameSplit;
+    }
+
+    public String getBrowserUrl() {
+        try {
+            return BROWSER_URL_BASE + URLEncoder.encode(getFile(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

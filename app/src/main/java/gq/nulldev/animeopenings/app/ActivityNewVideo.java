@@ -1,14 +1,17 @@
 package gq.nulldev.animeopenings.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,6 +60,7 @@ public class ActivityNewVideo extends Activity {
     //UI Elements
     private ProgressBar bufferIndicator;
     private ImageButton settingsButton;
+    private ImageButton shareButton;
     private LinearLayout controlsBar;
     private TextView videoRangeText;
     private SeekBar seekBar;
@@ -119,6 +123,7 @@ public class ActivityNewVideo extends Activity {
         //Assign ui elements
         bufferIndicator = (ProgressBar) findViewById(R.id.bufferIndicator);
         settingsButton = (ImageButton) findViewById(R.id.btnSettings);
+        shareButton = (ImageButton) findViewById(R.id.btnShare);
         controlsBar = (LinearLayout) findViewById(R.id.lowerBtnBar);
         videoRangeText = (TextView) findViewById(R.id.pbRange);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -138,6 +143,34 @@ public class ActivityNewVideo extends Activity {
             @Override
             public void onClick(View v) {
                 openSettings();
+            }
+        });
+        //Open openings.moe link on click
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                new AlertDialog.Builder(ActivityNewVideo.this).setTitle(R.string.activity_nv_share_title)
+                        .setItems(new CharSequence[]{getString(R.string.activity_nv_share_op_1), getString(R.string.activity_nv_share_op_2)}, new DialogInterface.OnClickListener() {
+                            @Override public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                if (mediaService != null && mediaService.getCurrentVideo() != null) {
+                                    String openingsMoeUrl = mediaService.getCurrentVideo().getBrowserUrl();
+
+                                    switch (which) {
+                                        case 0:
+                                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(openingsMoeUrl));
+                                            startActivity(browserIntent);
+                                            break;
+                                        case 1:
+                                            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                                            sharingIntent.setType("text/plain");
+                                            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.activity_nv_share_subject));
+                                            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, String.format(getString(R.string.activity_nv_share_body), openingsMoeUrl));
+                                            startActivity(Intent.createChooser(sharingIntent, getString(R.string.activity_nv_share_chooser)));
+                                            break;
+                                    }
+                                }
+                            }
+                        }).show();
             }
         });
 

@@ -71,4 +71,10 @@
     <string name="view_ctut_tap">Tap to hide/show\ncontrols</string>
     <string name="activity_nv_play_button_desc">Play Button</string>
     <string name="activity_nv_settings_button_desc">Settings Button</string>
+    <string name="activity_nv_share_title">Select an action</string>
+    <string name="activity_nv_share_op_1">Open in http://openings.moe/</string>
+    <string name="activity_nv_share_op_2">Share song</string>
+    <string name="activity_nv_share_subject">Check out this Anime opening!</string>
+    <string name="activity_nv_share_body">Check out this awesome Anime opening: %s (Sent from AnimeOpenings on Android)!</string>
+    <string name="activity_nv_share_chooser">Share via</string>
 </resources>

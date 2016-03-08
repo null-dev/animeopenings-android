@@ -66,12 +66,23 @@
         <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:id="@+id/btnShare"
+            android:src="@android:drawable/ic_menu_upload"
+            android:background="@drawable/flat_button"
+            android:padding="5dp"
+            android:contentDescription="Share Button"
+            android:clickable="true"/>
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:id="@+id/btnSettings"
             android:src="@android:drawable/ic_menu_preferences"
             android:background="@drawable/flat_button"
             android:padding="5dp"
             android:contentDescription="@string/activity_nv_settings_button_desc"
             android:clickable="true" />
+
     </LinearLayout>
 
     <LinearLayout
