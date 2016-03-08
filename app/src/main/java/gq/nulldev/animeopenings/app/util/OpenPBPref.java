@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.preference.Preference;
 import android.util.AttributeSet;
-import gq.nulldev.animeopenings.app.ActivityPB;
+import gq.nulldev.animeopenings.app.ActivityPlaylistBuilder;
 
 /**
  * Project: AnimeOpenings
@@ -29,7 +29,7 @@ public class OpenPBPref extends Preference {
     protected void onClick() {
         super.onClick();
 
-        Intent openPeIntent = new Intent(this.getContext(), ActivityPB.class);
+        Intent openPeIntent = new Intent(this.getContext(), ActivityPlaylistBuilder.class);
         this.getContext().startActivity(openPeIntent);
     }
 }

@@ -23,7 +23,7 @@ import java.util.regex.PatternSyntaxException;
  * Created: 15/11/15
  * Author: nulldev
  */
-public class ActivityPB extends Activity {
+public class ActivityPlaylistBuilder extends Activity {
 
     VideoListViewAdapter videoListViewAdapter;
     ExpandableListView expandableListView;
@@ -35,7 +35,7 @@ public class ActivityPB extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_pb);
+        setContentView(R.layout.activity_playlistbuilder);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 

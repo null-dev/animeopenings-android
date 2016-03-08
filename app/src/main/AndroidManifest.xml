@@ -44,7 +44,7 @@
 
         <!-- Playlist Editor -->
         <activity
-            android:name="gq.nulldev.animeopenings.app.ActivityPB"
+            android:name=".ActivityPlaylistBuilder"
             android:label="@string/activity_pb_label">
         </activity>
 
