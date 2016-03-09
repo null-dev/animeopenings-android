@@ -1,7 +1,8 @@
 package gq.nulldev.animeopenings.app.util;
 
-import android.media.MediaPlayer;
 import android.widget.TextView;
+
+import org.videolan.libvlc.MediaPlayer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -140,7 +141,7 @@ public class SubtitleSeeker {
                 //Get the current position
                 int currentPosition;
                 try {
-                    currentPosition = player.getCurrentPosition();
+                    currentPosition = (int) (player.getPosition() * player.getLength());
                 } catch(IllegalStateException e) {
                     return;
                 }

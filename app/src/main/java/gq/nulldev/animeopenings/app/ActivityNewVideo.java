@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.media.MediaPlayer;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,6 +30,7 @@ import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +40,8 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
+import org.videolan.libvlc.IVLCVout;
+import org.videolan.libvlc.MediaPlayer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -53,9 +56,11 @@ import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 import gq.nulldev.animeopenings.app.util.TutorialView;
 import subtitleFile.TimedTextObject;
 
-public class ActivityNewVideo extends Activity {
+public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
     public final static String TAG = "AnimeOpenings";
     public final static Locale LOCALE = Locale.US;
+
+    public final static int SEEK_BAR_ACCURACY = 10000;
 
     //UI Elements
     private ProgressBar bufferIndicator;
@@ -69,6 +74,9 @@ public class ActivityNewVideo extends Activity {
     private TextView songInfo;
     private TextView subtitleTextView;
     private LinearLayout topButtonBar;
+
+    private int mVideoWidth;
+    private int mVideoHeight;
 
     //Music service
     MediaService mediaService;
@@ -94,6 +102,8 @@ public class ActivityNewVideo extends Activity {
 
     public final static int PLAY_ICON = android.R.drawable.ic_media_play;
     public final static int PAUSE_ICON = android.R.drawable.ic_media_pause;
+
+    float positionBackup = -1;
 
     HideControlsTask hideControlsTask;
 
@@ -127,7 +137,6 @@ public class ActivityNewVideo extends Activity {
         controlsBar = (LinearLayout) findViewById(R.id.lowerBtnBar);
         videoRangeText = (TextView) findViewById(R.id.pbRange);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
-        updateSeekMax(100);
         playPauseButton = (ImageButton) findViewById(R.id.btnPlayPause);
         surfaceView = (SurfaceView) findViewById(R.id.fullscreen_video);
         songInfo = (TextView) findViewById(R.id.songInfo);
@@ -136,6 +145,9 @@ public class ActivityNewVideo extends Activity {
 
         //Default seek bar to 00:00/00:00
         updatePlaybackRangeText(0, 0);
+
+        //Set seekbar max to accuracy
+        updateSeekMax(SEEK_BAR_ACCURACY);
 
         //Assign actions to buttons
         //Open settings on settings button click
@@ -194,7 +206,7 @@ public class ActivityNewVideo extends Activity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser && mediaService.getPlayer() != null) {
-                    mediaService.getPlayer().seekTo(progress);
+                    mediaService.getPlayer().setPosition(progress);
                 }
             }
 
@@ -211,9 +223,18 @@ public class ActivityNewVideo extends Activity {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
+                holder.setKeepScreenOn(true);
                 if (mediaService != null && mediaService.getPlayer() != null) {
                     Log.i(TAG, "Surface re-created, restoring MediaPlayer state!");
-                    mediaService.getPlayer().setDisplay(holder);
+                    new Thread(new Runnable() {
+                        @Override public void run() {
+                            //Recreate entire mediaplayer
+                            mediaService.getPlayer().pause();
+                            //Request that the position be restored on next rebuilding
+                            positionBackup = mediaService.getPlayer().getPosition();
+                            mediaService.playVideo(mediaService.getCurrentVideo());
+                        }
+                    }).start();
                 }
             }
 
@@ -224,7 +245,7 @@ public class ActivityNewVideo extends Activity {
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 if (mediaService != null && mediaService.getPlayer() != null) {
-                    mediaService.getPlayer().setDisplay(null);
+//                    releaseVoutView(mediaService.getPlayer());
                 }
             }
         });
@@ -239,6 +260,67 @@ public class ActivityNewVideo extends Activity {
         });
     }
 
+    void bindVoutView(MediaPlayer player) {
+        final IVLCVout vout = player.getVLCVout();
+//        vout.setVideoView(surfaceView);
+        vout.setVideoSurface(surfaceView.getHolder().getSurface(), surfaceView.getHolder());
+        //TODO
+        //vout.setSubtitlesView(mSurfaceSubtitles);
+        vout.attachViews();
+    }
+
+    void releaseVoutView(MediaPlayer player) {
+        player.getVLCVout().detachViews();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setSize(mVideoWidth, mVideoHeight);
+    }
+
+    private void setSize(int width, int height) {
+        mVideoWidth = width;
+        mVideoHeight = height;
+        if (mVideoWidth * mVideoHeight <= 1)
+            return;
+
+        if(surfaceView == null || surfaceView.getHolder() == null)
+            return;
+
+        // get screen size
+        int w = getWindow().getDecorView().getWidth();
+        int h = getWindow().getDecorView().getHeight();
+
+        // getWindow().getDecorView() doesn't always take orientation into
+        // account, we have to correct the values
+        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        if (w > h && isPortrait || w < h && !isPortrait) {
+            int i = w;
+            w = h;
+            h = i;
+        }
+
+        float videoAR = (float) mVideoWidth / (float) mVideoHeight;
+        float screenAR = (float) w / (float) h;
+
+        if (screenAR < videoAR)
+            h = (int) (w / videoAR);
+        else
+            w = (int) (h * videoAR);
+
+        // force surface buffer size
+        surfaceView.getHolder().setFixedSize(mVideoWidth, mVideoHeight);
+
+        // set display size
+        RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) surfaceView.getLayoutParams();
+        lp.width = w;
+        lp.height = h;
+        surfaceView.setLayoutParams(lp);
+        surfaceView.invalidate();
+    }
+
+
     void bindServices() {
         if (mediaService == null) {
             Intent intent = new Intent(this, MediaService.class);
@@ -248,51 +330,39 @@ public class ActivityNewVideo extends Activity {
                     mediaService = ((MediaService.MediaBinder) service).getService();
                     mediaService.setOnMediaPlayerBuiltListener(new MediaService.OnMediaPlayerBuiltListener() {
                         @Override
-                        public void onMediaPlayerBuilt(MediaPlayer mp) {
-                            mp.setDisplay(surfaceView.getHolder());
-                            //Show buffer progress in seekbar
-                            mp.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
-                                @Override
-                                public void onBufferingUpdate(MediaPlayer mp, int percent) {
-                                    updateSeekBuffered(percent);
+                        public void onMediaPlayerBuilt(final MediaPlayer mp) {
+                            bindVoutView(mp);
+                            mp.getVLCVout().addCallback(ActivityNewVideo.this);
+                            mediaService.setOnMediaPlayerReleasedListener(new MediaService.OnMediaPlayerReleasedListener() {
+                                @Override public void onMediaPlayerReleased(MediaPlayer player) {
+                                    player.getVLCVout().removeCallback(ActivityNewVideo.this);
                                 }
                             });
-                            //Show spinny thing when buffering
-                            mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-                                @Override
-                                public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                                    if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
-                                        bufferIndicator.setVisibility(View.VISIBLE);
-                                        return true;
-                                    } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
-                                        bufferIndicator.setVisibility(View.GONE);
-                                        return true;
+                            mp.setEventListener(new MediaPlayer.EventListener() {
+                                @Override public void onEvent(MediaPlayer.Event event) {
+                                    switch (event.type) {
+                                        case MediaPlayer.Event.Opening:
+                                            bufferIndicator.setVisibility(View.VISIBLE);
+                                            break;
+                                        case MediaPlayer.Event.Playing:
+                                            //Restore position backup if required
+                                            if(positionBackup != -1) {
+                                                mediaService.getPlayer().setPosition(positionBackup);
+                                                positionBackup = -1;
+                                            }
+                                            //Hide buffer loading indicator
+                                            bufferIndicator.setVisibility(View.GONE);
+                                            updateTrackString(mediaService.getCurrentVideo(), getVideoDetails(mediaService.getCurrentVideo(), true));
+                                            break;
+                                        case MediaPlayer.Event.EndReached:
+                                            if (preferences.getBoolean("prefLoopVideo", false)) {
+                                                mp.setPosition(0);
+                                                mp.play();
+                                            } else {
+                                                playNextVideo();
+                                            }
+                                            break;
                                     }
-                                    return false;
-                                }
-                            });
-                            //OnCompletionListener
-                            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mp) {
-                                    if (preferences.getBoolean("prefLoopVideo", false)) {
-                                        mp.seekTo(0);
-                                        mp.start();
-                                    } else {
-                                        playNextVideo();
-                                    }
-                                }
-                            });
-                            //OnPreparedListener
-                            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(final MediaPlayer mp) {
-                                    //Update seek bar
-                                    updateSeekMax(mp.getDuration());
-                                    //Hide buffer loading indicator
-                                    bufferIndicator.setVisibility(View.GONE);
-                                    updateTrackString(mediaService.getCurrentVideo(), getVideoDetails(mediaService.getCurrentVideo(), true));
-                                    mp.start();
                                 }
                             });
                         }
@@ -307,12 +377,12 @@ public class ActivityNewVideo extends Activity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (mediaService.getPlayer() != null && mediaService.getPlayer().isPlaying()) {
+                            if (mediaService.getPlayer() != null && mediaService.isPlaying()) {
 //                            Update seek bar
-                                updateSeekPlayed(mediaService.getPlayer().getCurrentPosition());
+                                updateSeekPlayed(mediaService.getPlayer().getPosition());
 //                            Update played
-                                updatePlaybackRangeText(mediaService.getPlayer().getCurrentPosition(),
-                                        mediaService.getPlayer().getDuration());
+                                updatePlaybackRangeText((int) mediaService.getPositionMS(),
+                                        (int) mediaService.getPlayer().getLength());
                             }
                             handler.postDelayed(this, 500);
                         }
@@ -356,6 +426,7 @@ public class ActivityNewVideo extends Activity {
         seekBar.setMax(max);
     }
 
+    //Not working in VLC
     void updateSeekBuffered(int buffered) {
         int amountBuffered = buffered;
         //Division by zero protection
@@ -364,9 +435,9 @@ public class ActivityNewVideo extends Activity {
         seekBar.setSecondaryProgress((amountBuffered / 100) * seekBar.getMax());
     }
 
-    void updateSeekPlayed(int percent) {
+    void updateSeekPlayed(float percent) {
         if (mediaService.getPlayer() != null) {
-            seekBar.setProgress(percent);
+            seekBar.setProgress((int) (percent * SEEK_BAR_ACCURACY));
         }
     }
 
@@ -511,10 +582,12 @@ public class ActivityNewVideo extends Activity {
     }
 
     public void onSwipeRight() {
+        positionBackup = -1;
         playNextVideo();
     }
 
     public void onSwipeLeft() {
+        positionBackup = -1;
         playPrevVideo();
     }
 
@@ -549,6 +622,25 @@ public class ActivityNewVideo extends Activity {
             });
             tutorialView.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onNewLayout(IVLCVout vlcVout, int width, int height, int visibleWidth, int visibleHeight, int sarNum, int sarDen) {
+        if (width * height == 0)
+            return;
+
+        // store video size
+        mVideoWidth = width;
+        mVideoHeight = height;
+        setSize(mVideoWidth, mVideoHeight);
+    }
+
+    @Override public void onSurfacesCreated(IVLCVout vlcVout) {
+
+    }
+
+    @Override public void onSurfacesDestroyed(IVLCVout vlcVout) {
+
     }
 }
 

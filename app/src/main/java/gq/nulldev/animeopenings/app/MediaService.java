@@ -4,13 +4,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.danikula.videocache.HttpProxyCacheServer;
+
+import org.videolan.libvlc.IVLCVout;
+import org.videolan.libvlc.LibVLC;
+import org.videolan.libvlc.Media;
+import org.videolan.libvlc.MediaPlayer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,7 +28,7 @@ import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
  * Created: 19/11/15
  * Author: nulldev
  */
-public class MediaService extends Service {
+public class MediaService extends Service implements LibVLC.HardwareAccelerationError {
 
     public static final String ACTION_PREV = "gq.nulldev.animeopenings.app.ACTION_PREV";
     public static final String ACTION_PLAYPAUSE = "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE";
@@ -34,13 +38,15 @@ public class MediaService extends Service {
     static HttpProxyCacheServer proxyCacheServer;
     static long previousProxyCacheSize = -1;
 
-    MediaPlayer player;
+    private LibVLC libvlc;
+    private MediaPlayer player = null;
     ArrayList<Video> videos;
     Stack<Video> playedVideos = new Stack<>();
     Video currentVideo = null;
     SubtitleSeeker subtitleSeeker = null;
     SharedPreferences preferences;
     OnMediaPlayerBuiltListener onMediaPlayerBuiltListener;
+    OnMediaPlayerReleasedListener onMediaPlayerReleasedListener;
     Runnable onStopListener = null;
     int playlistIndex = 0;
     boolean paused = false;
@@ -55,7 +61,7 @@ public class MediaService extends Service {
     }
 
     public static HttpProxyCacheServer getProxy(Context context, long size) {
-        if(proxyCacheServer == null
+        if (proxyCacheServer == null
                 || previousProxyCacheSize == -1
                 || size != previousProxyCacheSize) {
             proxyCacheServer = new HttpProxyCacheServer.Builder(context)
@@ -67,9 +73,9 @@ public class MediaService extends Service {
     }
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
-        if(preferences.getBoolean("prefCacheVideos", false)) {
+        if (preferences.getBoolean("prefCacheVideos", false)) {
             HttpProxyCacheServer proxy = getProxy(context,
-                    preferences.getInt("prefCacheLimit", 512)*1000000);
+                    preferences.getInt("prefCacheLimit", 512) * 1000000);
             return proxy.getProxyUrl(url);
         } else {
             return url;
@@ -78,10 +84,10 @@ public class MediaService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null) {
+        if (intent != null) {
             String action = intent.getAction();
-            if(!action.isEmpty()) {
-                switch(action) {
+            if (!action.isEmpty()) {
+                switch (action) {
                     case ACTION_PREV:
                         doPrev();
                         break;
@@ -92,11 +98,11 @@ public class MediaService extends Service {
                         doNext();
                         break;
                     case ACTION_EXIT:
-                        if(getPlayer() != null) {
+                        if (getPlayer() != null) {
                             getPlayer().stop();
                             getPlayer().release();
                             player = null;
-                            if(onStopListener != null)
+                            if (onStopListener != null)
                                 onStopListener.run();
                             stopSelf();
                         }
@@ -111,15 +117,16 @@ public class MediaService extends Service {
         updateNotification();
         return result;
     }
+
     void doPlayPause() {
         if (player != null) {
             if (paused) {
-                player.start();
+                player.play();
                 paused = false;
             } else {
                 try {
                     player.pause();
-                } catch(IllegalStateException e) {
+                } catch (IllegalStateException e) {
                     //Cannot pause while player is buffering, just stop the player entirely
                     player.stop();
                 }
@@ -128,13 +135,14 @@ public class MediaService extends Service {
         }
         updateNotification();
     }
+
     void doNext() {
         playNextVideo();
         updateNotification();
     }
 
     public boolean playPrevVideo() {
-        if(playedVideos.size() > 0) {
+        if (playedVideos.size() > 0) {
             playedVideos.pop(); //Pop the current video
             playVideo(playedVideos.peek());
             return true;
@@ -147,11 +155,11 @@ public class MediaService extends Service {
         subtitleSeeker.deSync(); //Desync the subtitle seeker
         currentVideo = vid;
         //Clear subtitles
-        if(player != null) {
-            player.reset();
+        if (player != null) {
+            releasePlayer();
         }
         String url = vid.getFileURL();
-        if(preferences.getBoolean("prefAudioOnly", false)) {
+        if (preferences.getBoolean("prefAudioOnly", false)) {
             url = "http://omam.nulldev.xyz/" + vid.getFile() + ".ogg";
         }
         Log.i(ActivityNewVideo.TAG, "Playing media: " + url);
@@ -159,20 +167,37 @@ public class MediaService extends Service {
         paused = false;
 
         try {
-            if(player == null)
+            if (player == null)
                 buildNewMediaPlayer();
-            player.setDataSource(this, Uri.parse(proxyURL(this, preferences, url)));
-            player.prepareAsync();
-        } catch(Exception ignored) {}
+            //TODO
+            Media m = new Media(libvlc, Uri.parse(proxyURL(this, preferences, url)));
+            player.setMedia(m);
+            player.play();
+        } catch (Exception ignored) {
+        }
         updateNotification();
+    }
+
+    private void releasePlayer() {
+        if (libvlc == null)
+            return;
+        if(onMediaPlayerReleasedListener != null)
+            onMediaPlayerReleasedListener.onMediaPlayerReleased(player);
+        player.stop();
+        final IVLCVout vout = player.getVLCVout();
+        vout.detachViews();
+        player.release();
+        libvlc.release();
+        libvlc = null;
+        player = null;
     }
 
     public void playNextVideo() {
         Video vid = null;
         boolean handledByPlaylist = false;
-        if(preferences.getBoolean("enable_playlist", false)) {
+        if (preferences.getBoolean("enable_playlist", false)) {
             boolean found = false;
-            while(!found) {
+            while (!found) {
                 //Disable empty playlist
                 //noinspection Convert2Diamond (Doesn't work without it)
                 if (preferences.getStringSet("playlist", new HashSet<String>()).size() < 1) {
@@ -204,13 +229,13 @@ public class MediaService extends Service {
                     }
                 }
             }
-            if(found) {
+            if (found) {
                 handledByPlaylist = true;
             }
         }
-        if(!handledByPlaylist) {
+        if (!handledByPlaylist) {
             vid = Video.getRandomVideo(videos);
-            switch(preferences.getString("prefVideoType", "all")) {
+            switch (preferences.getString("prefVideoType", "all")) {
                 case "openings":
                     //Loop till we get an opening
                     while (!vid.getName().toUpperCase(ActivityNewVideo.LOCALE).contains("OPENING")) {
@@ -236,7 +261,7 @@ public class MediaService extends Service {
 //        if(notification != null) {
 //            notification.cancel();
 //        }
-        if(getCurrentVideo() != null) {
+        if (getCurrentVideo() != null) {
             notification = new MediaNotification(this,
                     getCurrentVideo().getName(),
                     getCurrentVideo().getSource(),
@@ -245,11 +270,33 @@ public class MediaService extends Service {
     }
 
     MediaPlayer buildNewMediaPlayer() {
-        player = new MediaPlayer();
-        if(subtitleSeeker != null)
+        try {
+            // Create LibVLC
+            // TODO: make this more robust, and sync with audio demo
+            ArrayList<String> options = new ArrayList<>();
+            //options.add("--subsdec-encoding <encoding>");
+            options.add("--aout=opensles");
+            options.add("--audio-time-stretch"); // time stretching
+            libvlc = new LibVLC(options);
+            libvlc.setOnHardwareAccelerationError(this);
+
+            // Create media player
+            player = new MediaPlayer(libvlc);
+
+            // Set up video output
+//            final IVLCVout vout = mMediaPlayer.getVLCVout();
+//            vout.setVideoView(mSurface);
+            //vout.setSubtitlesView(mSurfaceSubtitles);
+//            vout.addCallback(this);
+//            vout.attachViews();
+            player.play();
+        } catch (Exception e) {
+            Log.e(ActivityNewVideo.TAG, "Error creating player!", e);
+        }
+        if (subtitleSeeker != null)
             subtitleSeeker.setPlayer(player);
 
-        if(onMediaPlayerBuiltListener != null) {
+        if (onMediaPlayerBuiltListener != null) {
             onMediaPlayerBuiltListener.onMediaPlayerBuilt(player);
         }
         updateNotification();
@@ -258,6 +305,19 @@ public class MediaService extends Service {
 
     public MediaPlayer getPlayer() {
         return player;
+    }
+
+    public long getPositionMS() {
+        return (long) (player.getPosition() * player.getLength());
+    }
+
+    public boolean isPlaying() {
+        try {
+            return player.isPlaying();
+        } catch(IllegalStateException e) {
+            //Player is released so obviously not playing
+            return false;
+        }
     }
 
     public void setPlayer(MediaPlayer player) {
@@ -288,6 +348,14 @@ public class MediaService extends Service {
         this.currentVideo = currentVideo;
     }
 
+    public OnMediaPlayerReleasedListener getOnMediaPlayerReleasedListener() {
+        return onMediaPlayerReleasedListener;
+    }
+
+    public void setOnMediaPlayerReleasedListener(OnMediaPlayerReleasedListener onMediaPlayerReleasedListener) {
+        this.onMediaPlayerReleasedListener = onMediaPlayerReleasedListener;
+    }
+
     public boolean isPaused() {
         return paused;
     }
@@ -305,8 +373,25 @@ public class MediaService extends Service {
         return new MediaBinder();
     }
 
+    @Override public void eventHardwareAccelerationError() {
+        //TODO
+        Log.e(ActivityNewVideo.TAG, "HW acceleration error!");
+    }
+
+    public LibVLC getLibvlc() {
+        return libvlc;
+    }
+
+    public void setLibvlc(LibVLC libvlc) {
+        this.libvlc = libvlc;
+    }
+
     public interface OnMediaPlayerBuiltListener {
         void onMediaPlayerBuilt(MediaPlayer mediaPlayer);
+    }
+
+    public interface OnMediaPlayerReleasedListener {
+        void onMediaPlayerReleased(MediaPlayer player);
     }
 
     public class MediaBinder extends Binder {
@@ -334,7 +419,7 @@ public class MediaService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(notification != null) {
+        if (notification != null) {
             notification.cancel();
         }
     }
