@@ -80,11 +80,8 @@ public class ActivityNewVideo extends Activity {
     //Handler
     private Handler handler;
 
-    //Instance
-    public static ActivityNewVideo INSTANCE;
-
-    //Played videos
-    public ArrayList<Video> videos;
+    //Played videos (TODO Find a better place to put this)
+    public static ArrayList<Video> videos;
 
     //Gesture detector
     GestureDetector gestureDetector;
@@ -105,8 +102,6 @@ public class ActivityNewVideo extends Activity {
 
         //Inflate XML
         setContentView(R.layout.activity_nv);
-
-        INSTANCE = this;
 
         //Get shared prefs
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -530,7 +525,6 @@ public class ActivityNewVideo extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        INSTANCE = null;
         if (serviceConnection != null) {
             unbindService(serviceConnection);
         }
