@@ -3,9 +3,9 @@ package gq.nulldev.animeopenings.app;
 import android.content.Context;
 import android.preference.PreferenceManager;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
