@@ -679,7 +679,7 @@ class GetVideosTask extends AsyncTask<Void, Void, ArrayList<Video>> {
         if (videos != null) {
 //            Log.d(LOG_TAG, Arrays.toString(videos.toArray()));
             dialog.dismiss();
-            activityNewVideo.videos = videos;
+            ActivityNewVideo.videos = videos;
 //            ConcurrencyUtils.runOnUiThread(new Runnable() {
 //                @Override
 //                public void run() {
