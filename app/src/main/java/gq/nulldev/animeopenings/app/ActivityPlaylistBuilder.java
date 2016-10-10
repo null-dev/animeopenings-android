@@ -62,7 +62,7 @@ public class ActivityPlaylistBuilder extends Activity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        sortedVideos = Video.sortVideos(ActivityNewVideo.INSTANCE.videos);
+        sortedVideos = Video.sortVideos(ActivityNewVideo.videos);
         displayingVideos = new ArrayList<>();
         displayingVideos.addAll(sortedVideos);
 
