@@ -64,6 +64,9 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
         if (proxyCacheServer == null
                 || previousProxyCacheSize == -1
                 || size != previousProxyCacheSize) {
+            if(proxyCacheServer != null) {
+                proxyCacheServer.shutdown();
+            }
             proxyCacheServer = new HttpProxyCacheServer.Builder(context)
                     .maxCacheSize(size)
                     .build();
@@ -73,9 +76,10 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     }
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
-        if (preferences.getBoolean("prefCacheVideos", false)) {
+        if(preferences.getBoolean("prefCacheVideos", false)) {
+            int cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
             HttpProxyCacheServer proxy = getProxy(context,
-                    preferences.getInt("prefCacheLimit", 512) * 1000000);
+                    cacheLimit * 1024 * 1024);
             return proxy.getProxyUrl(url);
         } else {
             return url;
@@ -174,6 +178,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
             player.setMedia(m);
             player.play();
         } catch (Exception ignored) {
+            Log.e(ActivityNewVideo.TAG, "Exception thrown while preparing player!", e);
         }
         updateNotification();
     }
