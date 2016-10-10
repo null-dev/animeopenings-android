@@ -18,6 +18,9 @@ android:
 install:
   - true
 
+jdk:
+  - oraclejdk8
+
 script:
   - ./gradlew :app:assembleDebug
 
