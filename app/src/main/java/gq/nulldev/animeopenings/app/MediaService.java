@@ -18,8 +18,8 @@ import org.videolan.libvlc.MediaPlayer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
@@ -41,7 +41,8 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     private LibVLC libvlc;
     private MediaPlayer player = null;
     ArrayList<Video> videos;
-    Stack<Video> playedVideos = new Stack<>();
+    List<Video> videoStack = new ArrayList<>();
+    int currentVideoIndex = -1;
     Video currentVideo = null;
     SubtitleSeeker subtitleSeeker = null;
     SharedPreferences preferences;
@@ -77,7 +78,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
         if(preferences.getBoolean("prefCacheVideos", false)) {
-            int cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
+            long cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
             HttpProxyCacheServer proxy = getProxy(context,
                     cacheLimit * 1024 * 1024);
             return proxy.getProxyUrl(url);
@@ -146,9 +147,9 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     }
 
     public boolean playPrevVideo() {
-        if (playedVideos.size() > 0) {
-            playedVideos.pop(); //Pop the current video
-            playVideo(playedVideos.peek());
+        if(currentVideoIndex > 0) {
+            currentVideoIndex--;
+            playVideo(videoStack.get(currentVideoIndex));
             return true;
         } else {
             return false;
@@ -199,66 +200,71 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
 
     public void playNextVideo() {
         Video vid = null;
-        boolean handledByPlaylist = false;
-        if (preferences.getBoolean("enable_playlist", false)) {
-            boolean found = false;
-            while (!found) {
-                //Disable empty playlist
-                //noinspection Convert2Diamond (Doesn't work without it)
-                if (preferences.getStringSet("playlist", new HashSet<String>()).size() < 1) {
-                    preferences.edit().putBoolean("enable_playlist", false).apply();
-                    break;
-                } else {
+        currentVideoIndex++;
+        if(currentVideoIndex < videoStack.size()) {
+            vid = videoStack.get(currentVideoIndex);
+        } else {
+            boolean handledByPlaylist = false;
+            if (preferences.getBoolean("enable_playlist", false)) {
+                boolean found = false;
+                while (!found) {
+                    //Disable empty playlist
                     //noinspection Convert2Diamond (Doesn't work without it)
-                    Set<String> playlistSet = preferences.getStringSet("playlist", new HashSet<String>());
-                    String[] playlist = playlistSet.toArray(new String[playlistSet.size()]);
-                    if (playlistIndex >= playlist.length) {
-                        playlistIndex = 0;
-                    }
-                    String target = playlist[playlistIndex];
-                    playlistIndex++;
-                    for (Video video : videos) {
-                        if (video.getFile().equals(target)) {
-                            vid = video;
-                            found = true;
-                            break;
+                    if (preferences.getStringSet("playlist", new HashSet<String>()).size() < 1) {
+                        preferences.edit().putBoolean("enable_playlist", false).apply();
+                        break;
+                    } else {
+                        //noinspection Convert2Diamond (Doesn't work without it)
+                        Set<String> playlistSet = preferences.getStringSet("playlist", new HashSet<String>());
+                        String[] playlist = playlistSet.toArray(new String[playlistSet.size()]);
+                        if (playlistIndex >= playlist.length) {
+                            playlistIndex = 0;
+                        }
+                        String target = playlist[playlistIndex];
+                        playlistIndex++;
+                        for (Video video : videos) {
+                            if (video.getFile().equals(target)) {
+                                vid = video;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            playlistSet.remove(target);
+                            preferences
+                                    .edit()
+                                    .remove("playlist")
+                                    .putStringSet("playlist", playlistSet)
+                                    .apply();
                         }
                     }
-                    if (!found) {
-                        playlistSet.remove(target);
-                        preferences
-                                .edit()
-                                .remove("playlist")
-                                .putStringSet("playlist", playlistSet)
-                                .apply();
-                    }
+                }
+                if (found) {
+                    handledByPlaylist = true;
                 }
             }
-            if (found) {
-                handledByPlaylist = true;
+            if (!handledByPlaylist) {
+                vid = Video.getRandomVideo(videos);
+                switch (preferences.getString("prefVideoType", "all")) {
+                    case "openings":
+                        //Loop till we get an opening
+                        while (!vid.getName().toUpperCase(ActivityNewVideo.LOCALE).contains("OPENING")) {
+                            vid = Video.getRandomVideo(videos);
+                        }
+                        break;
+                    case "endings":
+                        //Loop till we get an ending
+                        while (!vid.getName().toUpperCase(ActivityNewVideo.LOCALE).contains("ENDING")) {
+                            vid = Video.getRandomVideo(videos);
+                        }
+                        break;
+                    default:
+                        //Do nothing really
+                        break;
+                }
             }
+            videoStack.add(vid);
         }
-        if (!handledByPlaylist) {
-            vid = Video.getRandomVideo(videos);
-            switch (preferences.getString("prefVideoType", "all")) {
-                case "openings":
-                    //Loop till we get an opening
-                    while (!vid.getName().toUpperCase(ActivityNewVideo.LOCALE).contains("OPENING")) {
-                        vid = Video.getRandomVideo(videos);
-                    }
-                    break;
-                case "endings":
-                    //Loop till we get an ending
-                    while (!vid.getName().toUpperCase(ActivityNewVideo.LOCALE).contains("ENDING")) {
-                        vid = Video.getRandomVideo(videos);
-                    }
-                    break;
-                default:
-                    //Do nothing really
-                    break;
-            }
-        }
-        playedVideos.push(vid);
         playVideo(vid);
     }
 
@@ -335,14 +341,6 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
 
     public void setVideos(ArrayList<Video> videos) {
         this.videos = videos;
-    }
-
-    public Stack<Video> getPlayedVideos() {
-        return playedVideos;
-    }
-
-    public void setPlayedVideos(Stack<Video> playedVideos) {
-        this.playedVideos = playedVideos;
     }
 
     public Video getCurrentVideo() {
