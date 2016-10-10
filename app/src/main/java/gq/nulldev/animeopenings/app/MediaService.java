@@ -58,6 +58,9 @@ public class MediaService extends Service {
         if(proxyCacheServer == null
                 || previousProxyCacheSize == -1
                 || size != previousProxyCacheSize) {
+            if(proxyCacheServer != null) {
+                proxyCacheServer.shutdown();
+            }
             proxyCacheServer = new HttpProxyCacheServer.Builder(context)
                     .maxCacheSize(size)
                     .build();
@@ -68,8 +71,9 @@ public class MediaService extends Service {
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
         if(preferences.getBoolean("prefCacheVideos", false)) {
+            int cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
             HttpProxyCacheServer proxy = getProxy(context,
-                    preferences.getInt("prefCacheLimit", 512)*1000000);
+                    cacheLimit * 1024 * 1024);
             return proxy.getProxyUrl(url);
         } else {
             return url;
@@ -163,7 +167,9 @@ public class MediaService extends Service {
                 buildNewMediaPlayer();
             player.setDataSource(this, Uri.parse(proxyURL(this, preferences, url)));
             player.prepareAsync();
-        } catch(Exception ignored) {}
+        } catch(Exception e) {
+            Log.e(ActivityNewVideo.TAG, "Exception thrown while preparing player!", e);
+        }
         updateNotification();
     }
 
