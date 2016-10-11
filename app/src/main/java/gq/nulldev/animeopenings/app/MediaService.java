@@ -123,19 +123,27 @@ public class MediaService extends Service implements LibVLC.OnNativeCrashListene
         return result;
     }
 
+    public void play() {
+        player.play();
+        paused = false;
+    }
+
+    public void pause() {
+        try {
+            player.pause();
+        } catch (IllegalStateException e) {
+            //Cannot pause while player is buffering, just stop the player entirely
+            player.stop();
+        }
+        paused = true;
+    }
+
     void doPlayPause() {
         if (player != null) {
             if (paused) {
-                player.play();
-                paused = false;
+                play();
             } else {
-                try {
-                    player.pause();
-                } catch (IllegalStateException e) {
-                    //Cannot pause while player is buffering, just stop the player entirely
-                    player.stop();
-                }
-                paused = true;
+                pause();
             }
         }
         updateNotification();

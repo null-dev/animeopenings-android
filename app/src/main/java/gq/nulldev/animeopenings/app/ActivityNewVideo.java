@@ -224,7 +224,9 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
                     positionBackup = mediaService.getPlayer().getPosition();
                     mediaService.getPlayer().stop(); //Cannot just pause as video screws up when rebinding views
                     bindVoutView(mediaService.getPlayer());
-                    mediaService.getPlayer().play();
+                    if(!mediaService.isPaused()) {
+                        mediaService.getPlayer().play();
+                    }
                 }
             }
 
@@ -405,10 +407,12 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
     }
 
     void updatePlayPauseButton() {
-        if (mediaService.isPaused()) {
-            playPauseButton.setImageDrawable(getResources().getDrawable(PLAY_ICON));
-        } else {
-            playPauseButton.setImageDrawable(getResources().getDrawable(PAUSE_ICON));
+        if(mediaService != null) {
+            if (mediaService.isPaused()) {
+                playPauseButton.setImageDrawable(getResources().getDrawable(PLAY_ICON));
+            } else {
+                playPauseButton.setImageDrawable(getResources().getDrawable(PAUSE_ICON));
+            }
         }
     }
 
@@ -611,6 +615,8 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
             });
             tutorialView.setVisibility(View.VISIBLE);
         }
+        //Sync play/pause button
+        updatePlayPauseButton();
     }
 
     @Override
