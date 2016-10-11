@@ -16,15 +16,11 @@ import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
 /**

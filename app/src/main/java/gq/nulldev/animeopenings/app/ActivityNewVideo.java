@@ -221,16 +221,10 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
             public void surfaceCreated(SurfaceHolder holder) {
                 holder.setKeepScreenOn(true);
                 if (mediaService != null && mediaService.getPlayer() != null) {
-                    Log.i(TAG, "Surface re-created, restoring MediaPlayer state!");
-                    new Thread(new Runnable() {
-                        @Override public void run() {
-                            //Recreate entire mediaplayer
-                            mediaService.getPlayer().pause();
-                            //Request that the position be restored on next rebuilding
-                            positionBackup = mediaService.getPlayer().getPosition();
-                            mediaService.playVideo(mediaService.getCurrentVideo());
-                        }
-                    }).start();
+                    positionBackup = mediaService.getPlayer().getPosition();
+                    mediaService.getPlayer().stop(); //Cannot just pause as video screws up when rebinding views
+                    bindVoutView(mediaService.getPlayer());
+                    mediaService.getPlayer().play();
                 }
             }
 
@@ -388,7 +382,7 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
 
                 @Override
                 public void onServiceDisconnected(ComponentName name) {
-                    Log.w("AnimeOpenings", "MediaService disconnected!");
+                    Log.w(TAG, "MediaService disconnected!");
                 }
             };
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -398,7 +392,7 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
     public void updateTrackString(Video vid, VideoDetails details) {
         String trackString = "<b>" + vid.getSource() + "</b><br/>" + vid.getName();
         if (details != null && details.getSubtitles() != null) {
-            trackString += "<br/>Subtitler: " + details.getSubtitles();
+            trackString += "<br/>" + getString(R.string.activity_nv_subtitler, details.getSubtitles());
         }
         songInfo.setText(Html.fromHtml(trackString));
         showControls();

@@ -77,4 +77,5 @@
     <string name="activity_nv_share_subject">Check out this Anime opening!</string>
     <string name="activity_nv_share_body">Check out this awesome Anime opening: %s (Sent from AnimeOpenings on Android)!</string>
     <string name="activity_nv_share_chooser">Share via</string>
+    <string name="activity_nv_subtitler">Subtitler: %s</string>
 </resources>
