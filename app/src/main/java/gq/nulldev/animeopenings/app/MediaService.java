@@ -16,11 +16,15 @@ import org.videolan.libvlc.LibVLC;
 import org.videolan.libvlc.Media;
 import org.videolan.libvlc.MediaPlayer;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import gq.nulldev.animeopenings.app.util.ConcurrencyUtils;
 import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
 
 /**
@@ -28,7 +32,7 @@ import gq.nulldev.animeopenings.app.util.SubtitleSeeker;
  * Created: 19/11/15
  * Author: nulldev
  */
-public class MediaService extends Service implements LibVLC.HardwareAccelerationError {
+public class MediaService extends Service implements LibVLC.OnNativeCrashListener {
 
     public static final String ACTION_PREV = "gq.nulldev.animeopenings.app.ACTION_PREV";
     public static final String ACTION_PLAYPAUSE = "gq.nulldev.animeopenings.app.ACTION_PLAYPAUSE";
@@ -65,7 +69,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
         if (proxyCacheServer == null
                 || previousProxyCacheSize == -1
                 || size != previousProxyCacheSize) {
-            if(proxyCacheServer != null) {
+            if (proxyCacheServer != null) {
                 proxyCacheServer.shutdown();
             }
             proxyCacheServer = new HttpProxyCacheServer.Builder(context)
@@ -77,7 +81,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     }
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
-        if(preferences.getBoolean("prefCacheVideos", false)) {
+        if (preferences.getBoolean("prefCacheVideos", false)) {
             long cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
             HttpProxyCacheServer proxy = getProxy(context,
                     cacheLimit * 1024 * 1024);
@@ -147,7 +151,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     }
 
     public boolean playPrevVideo() {
-        if(currentVideoIndex > 0) {
+        if (currentVideoIndex > 0) {
             currentVideoIndex--;
             playVideo(videoStack.get(currentVideoIndex));
             return true;
@@ -178,7 +182,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
             Media m = new Media(libvlc, Uri.parse(proxyURL(this, preferences, url)));
             player.setMedia(m);
             player.play();
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             Log.e(ActivityNewVideo.TAG, "Exception thrown while preparing player!", e);
         }
         updateNotification();
@@ -187,7 +191,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     private void releasePlayer() {
         if (libvlc == null)
             return;
-        if(onMediaPlayerReleasedListener != null)
+        if (onMediaPlayerReleasedListener != null)
             onMediaPlayerReleasedListener.onMediaPlayerReleased(player);
         player.stop();
         final IVLCVout vout = player.getVLCVout();
@@ -201,7 +205,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     public void playNextVideo() {
         Video vid = null;
         currentVideoIndex++;
-        if(currentVideoIndex < videoStack.size()) {
+        if (currentVideoIndex < videoStack.size()) {
             vid = videoStack.get(currentVideoIndex);
         } else {
             boolean handledByPlaylist = false;
@@ -288,8 +292,8 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
             //options.add("--subsdec-encoding <encoding>");
             options.add("--aout=opensles");
             options.add("--audio-time-stretch"); // time stretching
+            LibVLC.setOnNativeCrashListener(this);
             libvlc = new LibVLC(options);
-            libvlc.setOnHardwareAccelerationError(this);
 
             // Create media player
             player = new MediaPlayer(libvlc);
@@ -314,6 +318,12 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
         return player;
     }
 
+    public void seekTo(final float pos) {
+        if (player != null && player.isSeekable()) {
+            player.setPosition(pos);
+        }
+    }
+
     public MediaPlayer getPlayer() {
         return player;
     }
@@ -325,7 +335,7 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
     public boolean isPlaying() {
         try {
             return player.isPlaying();
-        } catch(IllegalStateException e) {
+        } catch (IllegalStateException e) {
             //Player is released so obviously not playing
             return false;
         }
@@ -376,17 +386,18 @@ public class MediaService extends Service implements LibVLC.HardwareAcceleration
         return new MediaBinder();
     }
 
-    @Override public void eventHardwareAccelerationError() {
-        //TODO
-        Log.e(ActivityNewVideo.TAG, "HW acceleration error!");
-    }
-
     public LibVLC getLibvlc() {
         return libvlc;
     }
 
     public void setLibvlc(LibVLC libvlc) {
         this.libvlc = libvlc;
+    }
+
+    @Override
+    public void onNativeCrash() {
+        //TODO
+        Log.e(ActivityNewVideo.TAG, "VLC native component crashed!");
     }
 
     public interface OnMediaPlayerBuiltListener {

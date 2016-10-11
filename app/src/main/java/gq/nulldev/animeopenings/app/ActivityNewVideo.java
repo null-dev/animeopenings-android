@@ -200,8 +200,9 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mediaService.getPlayer() != null) {
-                    mediaService.getPlayer().setPosition(progress);
+                if (fromUser) {
+                    float fPos = (float) progress/SEEK_BAR_ACCURACY;
+                    mediaService.seekTo(fPos);
                 }
             }
 
@@ -240,7 +241,7 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 if (mediaService != null && mediaService.getPlayer() != null) {
-//                    releaseVoutView(mediaService.getPlayer());
+                    releaseVoutView(mediaService.getPlayer());
                 }
             }
         });
@@ -635,6 +636,12 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
 
     @Override public void onSurfacesDestroyed(IVLCVout vlcVout) {
 
+    }
+
+    @Override
+    public void onHardwareAccelerationError(IVLCVout vlcVout) {
+        //TODO
+        Log.e(ActivityNewVideo.TAG, "HW acceleration error!");
     }
 }
 
