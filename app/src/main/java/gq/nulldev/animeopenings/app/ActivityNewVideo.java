@@ -106,6 +106,8 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
 
     public SharedPreferences preferences;
 
+    private boolean voutBound = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -227,6 +229,9 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
                     if(!mediaService.isPaused()) {
                         mediaService.getPlayer().play();
                     }
+                } else {
+                    //Player not active but vout is supposed to be bound as activity is showing, queue vout for bind
+                    voutBound = true;
                 }
             }
 
@@ -259,10 +264,12 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
         //TODO
         //vout.setSubtitlesView(mSurfaceSubtitles);
         vout.attachViews();
+        voutBound = true;
     }
 
     void releaseVoutView(MediaPlayer player) {
         player.getVLCVout().detachViews();
+        voutBound = false;
     }
 
     @Override
@@ -323,7 +330,9 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
                     mediaService.setOnMediaPlayerBuiltListener(new MediaService.OnMediaPlayerBuiltListener() {
                         @Override
                         public void onMediaPlayerBuilt(final MediaPlayer mp) {
-                            bindVoutView(mp);
+                            if(voutBound) {
+                                bindVoutView(mp);
+                            }
                             mp.getVLCVout().addCallback(ActivityNewVideo.this);
                             mediaService.setOnMediaPlayerReleasedListener(new MediaService.OnMediaPlayerReleasedListener() {
                                 @Override public void onMediaPlayerReleased(MediaPlayer player) {
