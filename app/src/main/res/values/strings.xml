@@ -15,7 +15,7 @@
     <string name="pref_type_sum">The type of videos to play.</string>
 
     <string name="pref_openings_cp">Play in Background</string>
-    <string name="pref_openings_cp_sum">Continue playing after the screen is turned off or after the app is closed. (Buggy and may not work on all devices)</string>
+    <string name="pref_openings_cp_sum">Continue playing after the screen is turned off or after the app is closed.</string>
 
     <string name="pref_subtitles">Enable Subtitles</string>
     <string name="pref_subtitles_sum">Show subtitles. If this option is enabled, videos may take a few seconds longer to buffer. Not all videos have subtitles and subtitle styles are not preserved.</string>
@@ -24,7 +24,7 @@
     <string name="pref_eastereggs_sum">:P</string>
 
     <string name="pref_cache_videos">Enable Video Caching</string>
-    <string name="pref_cache_videos_sum">Keep some played videos on your device to reduce data usage. Disable this if videos play slower.</string>
+    <string name="pref_cache_videos_sum">Keep some played videos on your device to reduce data usage.</string>
     
     <string name="pref_openpe">Advanced Preferences</string>
     <string name="pref_openpe_sum">For advanced users only! Opens SharedPreferences editor.</string>

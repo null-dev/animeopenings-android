@@ -77,7 +77,7 @@ public class MediaService extends Service implements LibVLC.OnNativeCrashListene
     }
 
     public static String proxyURL(Context context, SharedPreferences preferences, String url) {
-        if (preferences.getBoolean("prefCacheVideos", false)) {
+        if (preferences.getBoolean("prefCacheVideos", true)) {
             long cacheLimit = Integer.parseInt(preferences.getString("prefCacheLimit", "512"));
             HttpProxyCacheServer proxy = getProxy(context,
                     cacheLimit * 1024 * 1024);
@@ -291,7 +291,6 @@ public class MediaService extends Service implements LibVLC.OnNativeCrashListene
     MediaPlayer buildNewMediaPlayer() {
         try {
             // Create LibVLC
-            // TODO: make this more robust, and sync with audio demo
             ArrayList<String> options = new ArrayList<>();
             //options.add("--subsdec-encoding <encoding>");
             options.add("--aout=opensles");
@@ -432,6 +431,10 @@ public class MediaService extends Service implements LibVLC.OnNativeCrashListene
 
     public void setOnStopListener(Runnable onStopListener) {
         this.onStopListener = onStopListener;
+    }
+
+    public MediaNotification getNotification() {
+        return notification;
     }
 
     @Override

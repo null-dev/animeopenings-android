@@ -602,6 +602,17 @@ public class ActivityNewVideo extends Activity implements IVLCVout.Callback {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(!preferences.getBoolean("prefContinuePlaying", true)) {
+            mediaService.pause();
+            if(mediaService.getNotification() != null) {
+                mediaService.getNotification().cancel();
+            }
+        }
+    }
+
     @Override protected void onResume() {
         super.onResume();
         //Show tutorial if required
