@@ -96,7 +96,7 @@ public class VideoListViewAdapter extends BaseExpandableListAdapter {
         ViewHolder holder;
 
         if (resultView == null) {
-            resultView = inflater.inflate(android.R.layout.simple_expandable_list_item_1, null);
+            resultView = inflater.inflate(R.layout.expandable_series_item, null);
             holder = new ViewHolder();
             holder.textLabel = (TextView) resultView.findViewById(android.R.id.text1);
             resultView.setTag(holder);
