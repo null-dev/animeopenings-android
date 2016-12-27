@@ -1,0 +1,64 @@
+<resources>
+    <string name="activity_nv_play_button_desc">Bouton de lecture</string>
+    <string name="activity_nv_settings_button_desc">Bouton de configuration</string>
+    <string name="activity_nv_share_body">Regardez ce superbe opening d\'anime : %s (envoyé via AnimeOpenings sur Android) !</string>
+    <string name="activity_nv_share_chooser">Partager via</string>
+    <string name="activity_nv_share_op_1">Ouvrir sur http://openings.moe/</string>
+    <string name="activity_nv_share_op_2">Partager la chanson</string>
+    <string name="activity_nv_share_subject">Regarder cet opening d\'anime !</string>
+    <string name="activity_nv_share_title">Choisissez une action</string>
+    <string name="activity_pb_clear_disable">Playlist DÉSACTIVÉE</string>
+    <string name="activity_pb_clear_enable">Playlist ACTIVÉE</string>
+    <string name="activity_pb_label">Gestionnaire de playlist</string>
+    <string name="activity_pb_regex">Regex</string>
+    <string name="activity_pb_regex_off">Regex DÉSACTIVÉE</string>
+    <string name="activity_pb_regex_on">Regex ACTIVÉE</string>
+    <string name="activity_pb_sel">Selectionnez</string>
+    <string name="activity_pb_selAll">Tous</string>
+    <string name="activity_pb_selNone">Aucun</string>
+    <string name="activity_pb_shint">Recherche</string>
+    <string name="activity_pe_label">Configuration avancée</string>
+    <string name="app_name">Openings d\'anime</string>
+    <string name="app_settings_name">Configuration des openings d\'anime</string>
+    <string name="dummy_button">Bouton d\'exemple</string>
+  <string name="dummy_content">&lt;b &gt;CONTRÔLES:&lt;/b&gt;\n
+        Glisser vers la gauche : Vidéo précédente\n
+        Glisser vers la droite : Vidéo suivante\n
+        Glisser vers le bas : Informations sur la vidéo\n
+        Glisser vers le haut : Voir les contrôles\n
+        Touche menu : Configurer</string>
+    <string name="not_next">Vidéo suivante</string>
+    <string name="not_playpause">Lecture / Pause</string>
+    <string name="not_prev">Vidéo précédente</string>
+    <string name="pref_advanced_category">Avancée</string>
+    <string name="pref_audio_only">Audio seulement</string>
+    <string name="pref_audio_only_sum">Ne jouer que l\'audio. Utilise moins de CPU et de data. Les versions d\'audio-only sont fournies par : omam.nulldev.xyz</string>
+    <string name="pref_cache_category">Cache</string>
+    <string name="pref_cache_limit">Taille de cache maximum (Mo)</string>
+    <string name="pref_cache_limit_sum">L\'espace maximal qui sera utilisé par le cache, en mégaoctets.</string>
+    <string name="pref_cache_videos">Activer le cache des vidéos</string>
+    <string name="pref_cache_videos_sum">Conserver quelques vidéos déjà lues sur votre terminal afin de réduire la consommation de datas. À désactiver si les vidéos sont lues lentement.</string>
+    <string name="pref_controls_help">Consulter l\'aide des contrôles</string>
+    <string name="pref_controls_help_sum">Voir le didacticiel à nouveau.</string>
+    <string name="pref_eastereggs">Activer les œufs de pâques</string>
+    <string name="pref_eastereggs_sum">:P</string>
+    <string name="pref_general_category">Général</string>
+    <string name="pref_loop_video">En boucle</string>
+    <string name="pref_loop_video_sum">Regarder la vidéo en boucle plutôt que de passer à la suivante.</string>
+    <string name="pref_misc_category">Autres</string>
+    <string name="pref_openings_cp">Lire en fond</string>
+    <string name="pref_openings_cp_sum">Continuer à jouer la vidéo après l\'extinction de l\'écran ou de l\'application (buggué et ne fonctionne pas sur tous les terminaux)</string>
+    <string name="pref_openpe">Préférences avancées</string>
+    <string name="pref_openpe_sum">Pour utilisateurs avancés uniquement ! Ouvre l\'éditeur des SharedPreferences.</string>
+    <string name="pref_pb">Ouvrir le gestionnaire de playlist</string>
+    <string name="pref_pb_sum">Vous autoriser à sélectionner les chansons à jouer.</string>
+    <string name="pref_subtitles">Activer les sous-titres</string>
+    <string name="pref_subtitles_sum">Voir les sous-titres. Si activé, les vidéos mettront un peu plus de temps à se lancer. Toutes les vidéos ne sont pas sous-titrées et la mise en page des sous-titres n\'est pas conservé !</string>
+    <string name="pref_type">Type de vidéo</string>
+    <string name="pref_type_sum">Le type des vidéos à jouer.</string>
+    <string name="pref_version">Version</string>
+    <string name="view_ctut_controls">Contrôles</string>
+    <string name="view_ctut_swipeleft">Glisser vers la gauche\npour la vidéo précédente</string>
+    <string name="view_ctut_swiperight">Glisser vers la droite\npour la vidéo suivante</string>
+    <string name="view_ctut_tap">Taper pour afficher ou non\nles contrôles</string>
+</resources>
