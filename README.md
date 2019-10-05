@@ -1,3 +1,5 @@
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 [![Build Status](https://travis-ci.org/null-dev/animeopenings-android.svg)](https://travis-ci.org/null-dev/animeopenings-android)
 
 # Anime Openings Android
